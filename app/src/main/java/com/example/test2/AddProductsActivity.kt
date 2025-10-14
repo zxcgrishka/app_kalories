@@ -3,14 +3,14 @@ package com.example.test2
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asLiveData
-import com.example.test2.databinding.ActivityMainBinding
+import com.example.test2.databinding.ActivityAddProductsBinding
 
 class AddProductsActivity : AppCompatActivity() {
-    lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityAddProductsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityAddProductsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val db = MainDb.getDb(this)
         db.tempProductDebugDao().getAllProducts1().asLiveData().observe(this){
