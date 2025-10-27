@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Разрешение для интернета (Retrofit к серверу) -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -17,9 +21,9 @@
         tools:targetApi="31"
         android:usesCleartextTraffic="true">
 
-        <!-- LoginActivity — стартовая (MAIN/LAUNCHER) -->
+        <!-- MainActivity пока что стартовая -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Test2">
             <intent-filter>
@@ -28,15 +32,15 @@
             </intent-filter>
         </activity>
 
-        <!-- RegisterActivity — для перехода из Login -->
+        <!-- LoginActivity — обычная activity -->
         <activity
-            android:name=".RegisterActivity"
+            android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.Test2" />
 
-        <!-- MainActivity — для перехода после успеха -->
+        <!-- RegisterActivity — для перехода из Login -->
         <activity
-            android:name=".MainActivity"
+            android:name=".RegisterActivity"
             android:exported="false"
             android:theme="@style/Theme.Test2" />
 
@@ -44,5 +48,11 @@
             android:name=".AddProductsActivity"
             android:exported="false" />
 
+        <!-- activity для камеры -->
+        <activity
+            android:name=".utils.CameraActivity"
+            android:exported="false" />
+
     </application>
 </manifest>
+

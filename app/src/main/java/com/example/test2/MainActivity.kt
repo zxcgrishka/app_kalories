@@ -14,6 +14,7 @@ import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
 import com.example.test2.ui.AuthViewModelFactory
 
+
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var repository: UserRepository
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             // Создай repository
             repository = UserRepository(
                 AppDatabase.getDatabase(this).userDao(),
-                NetworkModule.provideApiService(this),
+                NetworkModule.provideApiService(),
                 this
             )
             Log.d("MainActivity", "Repository created")  // Лог 2
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             Log.d("MainActivity", "Binding set")  // Лог 3
 
-            // Кнопка Add Product (твой редирект)
+            // Кнопка Add Product
             binding.btnAddProduct.setOnClickListener {
                 Log.d("MainActivity", "Add Product clicked")  // Лог 4
                 startActivity(Intent(this, AddProductsActivity::class.java))
@@ -58,4 +59,5 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Error in MainActivity: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
 }
