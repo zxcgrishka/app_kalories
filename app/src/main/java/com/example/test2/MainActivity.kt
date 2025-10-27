@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             setContentView(binding.root)
             Log.d("MainActivity", "Binding set")  // Лог 3
 
-            // Кнопка Add Product (твой редирект)
+            // Кнопка Add Product
             binding.btnAddProduct.setOnClickListener {
                 Log.d("MainActivity", "Add Product clicked")  // Лог 4
                 startActivity(Intent(this, AddProductsActivity::class.java))
