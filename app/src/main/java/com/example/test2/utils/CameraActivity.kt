@@ -3,6 +3,7 @@ package com.example.test2.utils
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -27,13 +28,27 @@ class CameraActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
+    // список разрешений для разных версий Android
+    private val requiredPermissions = arrayOf(
+        android.Manifest.permission.CAMERA
+    ).apply {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            plus(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         if (permissions.all { it.value }) {
+            // Все разрешения предоставлены
             startCamera()
         } else {
-            Toast.makeText(this, "Разрешение на камеру не предоставлено", Toast.LENGTH_SHORT).show()
+            // Некоторые разрешения не предоставлены
+            Toast.makeText(this,
+                "Для работы камеры необходимо предоставить разрешения",
+                Toast.LENGTH_LONG
+            ).show()
             finish()
         }
     }
@@ -45,14 +60,23 @@ class CameraActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
+        // Проверяем разрешения
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            // Запрашиваем разрешения
+            requestPermissionLauncher.launch(requiredPermissions)
         }
 
         binding.captureButton.setOnClickListener {
-            takePhoto()
+            if (allPermissionsGranted()) {
+                takePhoto()
+            } else {
+                Toast.makeText(this,
+                    "Сначала предоставьте разрешения для камеры",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
 
         binding.backButton.setOnClickListener {
@@ -60,7 +84,7 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+    private fun allPermissionsGranted() = requiredPermissions.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -87,6 +111,7 @@ class CameraActivity : AppCompatActivity() {
                 )
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
+                Toast.makeText(this, "Ошибка инициализации камеры", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -99,7 +124,9 @@ class CameraActivity : AppCompatActivity() {
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CalorieCounter")
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CalorieCounter")
+            }
         }
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(
@@ -114,15 +141,20 @@ class CameraActivity : AppCompatActivity() {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-                    Toast.makeText(this@CameraActivity, "Ошибка при съемке фото", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@CameraActivity,
+                        "Ошибка при съемке фото: ${exc.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = output.savedUri
-                    val msg = "Фото сохранено: $savedUri"
+                    val msg = "Фото сохранено"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
+                    Log.d(TAG, "Photo saved: $savedUri")
 
+                    // Возвращаем результат
                     val resultIntent = Intent().apply {
                         putExtra("photo_uri", savedUri.toString())
                     }
@@ -141,9 +173,5 @@ class CameraActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "CameraActivity"
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-        private val REQUIRED_PERMISSIONS = arrayOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
     }
 }

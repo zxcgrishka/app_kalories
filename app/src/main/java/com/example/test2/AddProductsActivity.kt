@@ -8,10 +8,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asLiveData
 import com.example.test2.databinding.ActivityAddProductsBinding
+import com.example.test2.network.NetworkModule
+import com.example.test2.network.NutritionixRepository
 import com.example.test2.utils.CameraActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AddProductsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddProductsBinding
+
+    // Nutritionix репозиторий
+    private val nutritionixRepository by lazy {
+        NutritionixRepository(NetworkModule.provideNutritionixService())
+    }
 
     // Регистрация для получения результата от камеры
     private val cameraLauncher = registerForActivityResult(
@@ -72,6 +83,11 @@ class AddProductsActivity : AppCompatActivity() {
         binding.btnOpenGallery?.setOnClickListener {
             openGallery()
         }
+
+        // Кнопка для текстового поиска в Nutritionix
+        binding.btnTextSearch?.setOnClickListener {
+            showTextSearchDialog()
+        }
     }
 
     private fun addProductManually(db: MainDb) {
@@ -112,17 +128,217 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun processPhotoWithNutritionix(photoUri: String) {
-        // TODO: Реализовать интеграцию с Nutritionix API
-        fillFieldsWithTestData()
+        showLoading(true)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val uri = Uri.parse(photoUri)
+
+                val result = nutritionixRepository.recognizeFoodFromImage(uri, this@AddProductsActivity)
+
+                withContext(Dispatchers.Main) {
+                    showLoading(false)
+
+                    when {
+                        result.isSuccess -> {
+                            val foods = result.getOrNull()
+                            if (foods.isNullOrEmpty()) {
+                                showManualInputFallback("Не удалось распознать продукт на фото")
+                            } else {
+                                showFoodSelectionDialog(foods)
+                            }
+                        }
+                        result.isFailure -> {
+                            val error = result.exceptionOrNull()
+                            if (error?.message?.contains("API error: 404") == true) {
+                                showManualInputFallback("Продукт не найден в базе Nutritionix")
+                            } else {
+                                showErrorFallback("Ошибка API: ${error?.message}")
+                            }
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showLoading(false)
+                    showErrorFallback("Ошибка обработки: ${e.message}")
+                }
+            }
+        }
     }
 
-    private fun fillFieldsWithTestData() {
-        binding.edName?.setText("Яблоко")
-        binding.edKalories.setText("52")
-        binding.edProteins?.setText("0")
-        binding.edFats?.setText("0")
-        binding.edCarbohydrates?.setText("14")
-        Toast.makeText(this, "Данные заполнены автоматически", Toast.LENGTH_SHORT).show()
+    private fun showTextSearchDialog() {
+        val input = android.widget.EditText(this)
+        input.hint = "Например: яблоко, куриная грудка, банан"
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Поиск продукта")
+            .setMessage("Введите название продукта для поиска в Nutritionix:")
+            .setView(input)
+            .setPositiveButton("Найти") { dialog, _ ->
+                val query = input.text.toString().trim()
+                if (query.isNotBlank()) {
+                    searchFoodByText(query)
+                } else {
+                    Toast.makeText(this, "Введите название продукта", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Отмена") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun searchFoodByText(query: String) {
+        showLoading(true)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val result = nutritionixRepository.recognizeFoodFromText(query)
+
+                withContext(Dispatchers.Main) {
+                    showLoading(false)
+
+                    when {
+                        result.isSuccess -> {
+                            val foods = result.getOrNull()
+                            if (foods.isNullOrEmpty()) {
+                                showManualInputFallback("Продукт '$query' не найден")
+                            } else {
+                                showFoodSelectionDialog(foods)
+                            }
+                        }
+                        result.isFailure -> {
+                            val error = result.exceptionOrNull()
+                            showErrorFallback("Ошибка поиска: ${error?.message}")
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showLoading(false)
+                    showErrorFallback("Ошибка поиска: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun showFoodSelectionDialog(foods: List<com.example.test2.network.NutritionixFood>) {
+        val foodNames = foods.mapIndexed { index, food ->
+            "${index + 1}. ${food.food_name} - ${food.nf_calories?.toInt() ?: 0} ккал"
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Выберите продукт")
+            .setItems(foodNames.toTypedArray()) { dialog, which ->
+                val selectedFood = foods[which]
+                fillFieldsWithNutritionixData(selectedFood)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Отмена") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setNeutralButton("Показать детали") { dialog, _ ->
+                dialog.dismiss()
+                showFoodDetailsDialog(foods)
+            }
+            .show()
+    }
+
+    private fun showFoodDetailsDialog(foods: List<com.example.test2.network.NutritionixFood>) {
+        val foodDetails = foods.joinToString("\n\n") { food ->
+            """
+            🍽 ${food.food_name}
+            🔥 Калории: ${food.nf_calories?.toInt() ?: 0} ккал
+            💪 Белки: ${food.nf_protein?.toInt() ?: 0}г
+            🥑 Жиры: ${food.nf_total_fat?.toInt() ?: 0}г
+            🍚 Углеводы: ${food.nf_total_carbohydrate?.toInt() ?: 0}г
+            📏 Порция: ${food.serving_qty ?: 1} ${food.serving_unit ?: "шт"}
+            """.trimIndent()
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Найденные продукты")
+            .setMessage(foodDetails)
+            .setPositiveButton("Выбрать первый") { dialog, _ ->
+                fillFieldsWithNutritionixData(foods.first())
+                dialog.dismiss()
+            }
+            .setNegativeButton("Закрыть") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun fillFieldsWithNutritionixData(food: com.example.test2.network.NutritionixFood) {
+        binding.edName?.setText(food.food_name)
+        binding.edKalories.setText((food.nf_calories?.toInt() ?: 0).toString())
+        binding.edProteins?.setText((food.nf_protein?.toInt() ?: 0).toString())
+        binding.edFats?.setText((food.nf_total_fat?.toInt() ?: 0).toString())
+        binding.edCarbohydrates?.setText((food.nf_total_carbohydrate?.toInt() ?: 0).toString())
+
+        // Показываем информацию о порции
+        val servingInfo = if (food.serving_qty != null && food.serving_unit != null) {
+            " (${food.serving_qty} ${food.serving_unit})"
+        } else {
+            ""
+        }
+
+        Toast.makeText(
+            this,
+            "Данные '${food.food_name}'$servingInfo загружены из Nutritionix",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    private fun showLoading(show: Boolean) {
+        // Можно добавить ProgressBar в layout
+        if (show) {
+            Toast.makeText(this, "Анализируем...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showErrorFallback(errorMessage: String) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Ошибка")
+            .setMessage("$errorMessage\nХотите ввести данные вручную?")
+            .setPositiveButton("Ввести вручную") { dialog, _ ->
+                dialog.dismiss()
+                binding.edName?.requestFocus()
+            }
+            .setNegativeButton("Попробовать снова") { dialog, _ ->
+                dialog.dismiss()
+                openCamera()
+            }
+            .setNeutralButton("Текстовый поиск") { dialog, _ ->
+                dialog.dismiss()
+                showTextSearchDialog()
+            }
+            .show()
+    }
+
+    private fun showManualInputFallback(message: String) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Информация")
+            .setMessage("$message\nВведите данные вручную или попробуйте текстовый поиск")
+            .setPositiveButton("Ввести вручную") { dialog, _ ->
+                dialog.dismiss()
+                binding.edName?.requestFocus()
+            }
+            .setNegativeButton("Текстовый поиск") { dialog, _ ->
+                dialog.dismiss()
+                showTextSearchDialog()
+            }
+            .setNeutralButton("Снять снова") { dialog, _ ->
+                dialog.dismiss()
+                openCamera()
+            }
+            .show()
     }
 
     private fun clearInputFields() {

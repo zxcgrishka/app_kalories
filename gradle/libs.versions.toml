@@ -21,19 +21,24 @@ androidxRecyclerviewSelection = "1.1.0"
 googleMaterial = "1.12.0"
 securityCrypto = "1.1.0-alpha06"
 uiToolingPreview = "1.5.4"
-androidxUi = "1.5.4"  # Добавил для Compose UI (если ref "androidxUi")
+androidxUi = "1.5.4"
 androidxComposeUi = "1.5.4"
-activity = "1.11.0"  # Добавил алиас, если используешь "androidxComposeUi" в ref
+activity = "1.11.0"
+
+# Новые версии для камеры и Nutritionix
 androidx-camera = "1.3.0"
+androidx-exifinterface = "1.3.6"
+glide = "4.15.1"
+commons-codec = "1.15"
 
 [libraries]
-# Firebase (оставил твои)
+# Firebase
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
-androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "androidxUi" }  # Исправил ref на "androidxUi"
+androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "androidxUi" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-ktx = { group = "com.google.firebase", name = "firebase-ktx" }
@@ -41,9 +46,9 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
-firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" } # Версия из BOM
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 
-# AndroidX (оставил твои)
+# AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCoreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version = "2.2.1" }
@@ -55,7 +60,7 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 androidx-recyclerview-selection = { group = "androidx.recyclerview", name = "recyclerview-selection", version.ref = "androidxRecyclerviewSelection" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "googleMaterial" }
 
-# Room (оставил твои)
+# Room
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -75,7 +80,11 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidx-camera" }
 
 # Для обработки изображений
-androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version = "1.3.6" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "androidx-exifinterface" }
+
+# Для Nutritionix (уникальные алиасы)
+glide-library = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+commons-codec-library = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
