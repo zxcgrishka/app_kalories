@@ -27,7 +27,7 @@ class RegisterActivity : AppCompatActivity() {
         // Создай repository
         repository = UserRepository(
             AppDatabase.getDatabase(this).userDao(),
-            NetworkModule.provideApiService(), // no context needed
+            NetworkModule.provideMyApiService(this), // no context needed
             this
         )
         Log.d("RegisterActivity", "Repository created")

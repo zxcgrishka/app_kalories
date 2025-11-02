@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             // Создай repository
             repository = UserRepository(
                 AppDatabase.getDatabase(this).userDao(),
-                NetworkModule.provideApiService(),
+                NetworkModule.provideMyApiService(this),
                 this
             )
             Log.d("MainActivity", "Repository created")  // Лог 2

@@ -29,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
             // Создай repository перед ViewModel
             repository = UserRepository(
                 AppDatabase.getDatabase(this).userDao(),
-                NetworkModule.provideApiService(),
+                NetworkModule.provideMyApiService(this),
                 this
             )
             Log.d("LoginActivity", "Repository created")  // Лог 2

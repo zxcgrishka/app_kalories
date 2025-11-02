@@ -7,23 +7,25 @@
     android:layout_height="match_parent"
     tools:context=".AddProductsActivity">
 
+    <!-- Кнопка камеры -->
     <TextView
         android:id="@+id/tvList"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="100dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:text="TextView"
-        android:gravity="center"
         android:background="#f0f0f0"
+        android:gravity="center"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/btnOpenCamera"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/btnOpenCamera" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Кнопка камеры -->
+    <!-- Кнопка галереи -->
     <Button
         android:id="@+id/btnOpenCamera"
         android:layout_width="0dp"
@@ -31,14 +33,14 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:text="Сфотографировать продукт"
         android:drawableStart="@android:drawable/ic_menu_camera"
+        android:text="Сфотографировать продукт"
+        app:layout_constraintBottom_toTopOf="@+id/btnOpenGallery"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvList"
-        app:layout_constraintBottom_toTopOf="@+id/btnOpenGallery" />
+        app:layout_constraintTop_toBottomOf="@+id/tvList" />
 
-    <!-- Кнопка галереи -->
     <Button
         android:id="@+id/btnOpenGallery"
         android:layout_width="0dp"
@@ -51,10 +53,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnOpenCamera"
-        app:layout_constraintBottom_toTopOf="@+id/editName" />
+        app:layout_constraintBottom_toTopOf="@+id/edName" />
 
     <EditText
-        android:id="@+id/editName"
+        android:id="@+id/edName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"

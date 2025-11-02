@@ -8,8 +8,6 @@ import androidx.room.RoomDatabase
 
 @Database(entities = [Product::class], version = 1, exportSchema = false)
 abstract class MainDb : RoomDatabase() {
-
-    abstract fun tempProductDebugDao(): Dao
     abstract fun getDao(): ProductDao
 
     companion object {

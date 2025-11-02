@@ -11,8 +11,10 @@ import com.example.test2.databinding.ActivityAddProductsBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.network.NutritionixRepository
 import com.example.test2.utils.CameraActivity
+import com.example.test2.ProductDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -57,7 +59,7 @@ class AddProductsActivity : AppCompatActivity() {
         val db = MainDb.getDb(this)
 
         // Наблюдатель за списком продуктов
-        db.tempProductDebugDao().getAllProducts1().asLiveData().observe(this) { products ->
+        db.getDao().getAllProducts().asLiveData().observe(this) { products ->
             binding.tvList.text = ""
             products.forEach { product ->
                 val text = "Id: ${product.id} Name: ${product.ProductName} " +
@@ -91,30 +93,56 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun addProductManually(db: MainDb) {
-        try {
-            val product = Product(
-                null,
-                binding.edName?.text?.toString() ?: "",
-                binding.edKalories.text.toString().toIntOrNull() ?: 0,
-                binding.edProteins?.text?.toString()?.toIntOrNull() ?: 0,
-                binding.edFats?.text?.toString()?.toIntOrNull() ?: 0,
-                binding.edCarbohydrates?.text?.toString()?.toIntOrNull() ?: 0
-            )
+        println("DEBUG: addProductManually called")
 
-            if (product.ProductName.isBlank()) {
-                Toast.makeText(this, "Введите название продукта", Toast.LENGTH_SHORT).show()
-                return
+        // Проверим все поля
+        println("DEBUG: edName is null: ${binding.edName == null}")
+        println("DEBUG: edKalories is null: ${binding.edKalories == null}")
+        println("DEBUG: edProteins is null: ${binding.edProteins == null}")
+        println("DEBUG: edFats is null: ${binding.edFats == null}")
+        println("DEBUG: edCarbohydrates is null: ${binding.edCarbohydrates == null}")
+
+        val name = binding.edName?.text?.toString() ?: ""
+        println("DEBUG: Name value: '$name'")
+
+        if (name.isBlank()) {
+            println("DEBUG: Name is blank, showing toast")
+            Toast.makeText(this, "Введите название продукта", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val product = Product(
+            null,
+            name,
+            binding.edKalories.text.toString().toIntOrNull() ?: 0,
+            binding.edProteins?.text?.toString()?.toIntOrNull() ?: 0,
+            binding.edFats?.text?.toString()?.toIntOrNull() ?: 0,
+            binding.edCarbohydrates?.text?.toString()?.toIntOrNull() ?: 0
+        )
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                db.getDao().insert(product)
+
+                withContext(Dispatchers.Main) {
+                    clearInputFields()
+                    Toast.makeText(
+                        this@AddProductsActivity,
+                        "Продукт '${product.ProductName}' успешно добавлен!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    println("DEBUG: Product inserted: ${product.ProductName}")
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@AddProductsActivity,
+                        "Ошибка БД: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    println("DEBUG: Database error: ${e.message}")
+                }
             }
-
-            Thread {
-                db.tempProductDebugDao().insertProduct(product)
-            }.start()
-
-            clearInputFields()
-            Toast.makeText(this, "Продукт добавлен", Toast.LENGTH_SHORT).show()
-
-        } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка при добавлении продукта: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 

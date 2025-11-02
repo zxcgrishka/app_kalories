@@ -9,7 +9,7 @@ interface NutritionixService {
 
     // Для распознавания по фото
     @Multipart
-    @POST("v2/natural/nutrients")
+    @POST("v2/natural/images/analyze")
     suspend fun recognizeFoodFromImage(
         @Part image: MultipartBody.Part,
         @Header("x-app-id") appId: String,
