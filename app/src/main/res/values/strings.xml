@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">test2</string>
+    <string name="Home">Home</string>
+    <string name="Calendar">Calendar</string>
+    <string name="Profile">Profile</string>
+    <string name="welcome_to_dashboard">Welcome to Dashboard!</string>
+    <string name="add_product">Add Product</string>
+    <string name="logout">Logout</string>
+    <string name="calendar_fragment">Calendar Fragment</string>
 </resources>

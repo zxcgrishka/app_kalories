@@ -68,6 +68,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.fragment.ktx)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 
@@ -81,6 +83,10 @@ dependencies {
     // Nutritionix
     implementation(libs.glide.library)
     implementation(libs.commons.codec.library)
-
     implementation(libs.androidx.exifinterface)
+
+    // Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
 }

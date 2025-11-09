@@ -1,5 +1,6 @@
 package com.example.test2
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -40,6 +41,8 @@ class RegisterActivity : AppCompatActivity() {
         viewModel.authResult.observe(this) { result ->
             Log.d("RegisterActivity", "authResult changed: $result")
             if (result.isSuccess) {
+                val username = binding.etUsername.text.toString()
+                saveUsername(username)
                 Toast.makeText(this, result.getOrNull(), Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
@@ -67,5 +70,13 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+    }
+    private fun saveUsername(username: String) {
+        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("current_username", username)
+            apply()
+        }
+        Log.d("LoginActivity", "Username saved: $username")
     }
 }

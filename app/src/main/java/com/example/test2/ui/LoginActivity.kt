@@ -1,6 +1,8 @@
 package com.example.test2  // Твоя package
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log  // Для лога
 import android.widget.Toast
@@ -54,6 +56,9 @@ class LoginActivity : AppCompatActivity() {
             viewModel.authResult.observe(this) { result ->
                 Log.d("LoginActivity", "authResult changed: $result")  // Лог 8
                 if (result.isSuccess) {
+                    val username = binding.etUsername.text.toString()  // Username из поля ввода
+                    // Сохрани username в SharedPreferences
+                    saveUsername(username)
                     Toast.makeText(this, result.getOrNull(), Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, MainActivity::class.java))
                     finish()
@@ -88,5 +93,15 @@ class LoginActivity : AppCompatActivity() {
             Log.e("LoginActivity", "onCreate error: ${e.message}", e)  // Полный лог краша
             Toast.makeText(this, "Error in LoginActivity: ${e.message}", Toast.LENGTH_LONG).show()
         }
+    }
+
+    // Метод для сохранения username
+    private fun saveUsername(username: String) {
+        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("current_username", username)
+            apply()
+        }
+        Log.d("LoginActivity", "Username saved: $username")
     }
 }
