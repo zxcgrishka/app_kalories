@@ -45,7 +45,12 @@
             android:theme="@style/Theme.Test2" />
 
         <activity
-            android:name=".AddProductsActivity"
+            android:name=".ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity"
+            android:exported="false" />
+
+        <activity android:name=".CreateDishActivity"
+            android:exported="false" />
+        <activity android:name=".AddDishActivity"
             android:exported="false" />
 
         <!-- activity для камеры -->

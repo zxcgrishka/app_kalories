@@ -1,6 +1,5 @@
-package com.example.test2
+package com.example.test2.ui.home.AddDish.CreateDish.AddProduct
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -9,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insert(product: Product)
 
     @Query("SELECT * FROM products ORDER BY name ASC")

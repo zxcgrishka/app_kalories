@@ -1,4 +1,5 @@
-package com.example.test2.data
+package com.example.test2.data.User
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

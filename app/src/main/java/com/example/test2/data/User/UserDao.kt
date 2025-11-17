@@ -1,11 +1,10 @@
-package com.example.test2.data
+package com.example.test2.data.User
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
-import com.example.test2.data.User
 
 @Dao
 interface UserDao {
@@ -15,7 +14,7 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE username = :username")
     suspend fun getUserByUsername(username: String): User?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
     suspend fun insert(user: User)
 
     @Query("DELETE FROM users")

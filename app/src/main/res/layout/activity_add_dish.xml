@@ -6,23 +6,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center"
-    tools:context=".ui.home.HomeFragment">
+    tools:context=".AddDishActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/welcome_to_dashboard"
+        android:text="Мои блюда"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMeals"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        tools:listitem="@layout/item_meal" />
+
     <Button
-        android:id="@+id/btnAddDish"
+        android:id="@+id/btnCreateDish"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/add_dish" />
-
+        android:text="Создать новое блюдо" />
 
 </LinearLayout>

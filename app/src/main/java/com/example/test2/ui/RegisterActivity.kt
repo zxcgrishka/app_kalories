@@ -7,12 +7,11 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.test2.data.AppDatabase
-import com.example.test2.data.UserRepository
+import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityRegisterBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
 import com.example.test2.ui.AuthViewModelFactory
-import androidx.lifecycle.ViewModelProvider
 import android.util.Log
 
 class RegisterActivity : AppCompatActivity() {
@@ -25,9 +24,9 @@ class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("RegisterActivity", "onCreate started")
-        // Создай repository
+        val database = AppDatabase.getDatabase(this)
         repository = UserRepository(
-            AppDatabase.getDatabase(this).userDao(),
+            database,
             NetworkModule.provideMyApiService(this), // no context needed
             this
         )

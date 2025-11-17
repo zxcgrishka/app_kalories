@@ -1,4 +1,4 @@
-package com.example.test2
+package com.example.test2.ui.home.AddDish.CreateDish.AddProduct
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -13,4 +13,3 @@ data class Product (
     @ColumnInfo(name = "fats") var ProductFats: Int,
     @ColumnInfo(name = "carbohydrates") var ProductCarbohydrates: Int
 )
-

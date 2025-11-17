@@ -8,10 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels  // Для shared ViewModel
-import com.example.test2.AddProductsActivity
+import androidx.fragment.app.activityViewModels
+import com.example.test2.AddDishActivity
+import com.example.test2.ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity
 import com.example.test2.LoginActivity
-import com.example.test2.MainActivity  // Импорт для cast
+import com.example.test2.MainActivity
 import com.example.test2.databinding.FragmentHomeBinding
 import com.example.test2.ui.AuthViewModel
 import com.example.test2.ui.AuthViewModelFactory
@@ -38,21 +39,10 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("HomeFragment", "onViewCreated started")  // Новый лог для фрагмента
+        Log.d("HomeFragment", "onViewCreated started")
 
-        // Кнопка Add Product
-        binding.btnAddProduct.setOnClickListener {
-            Log.d("HomeFragment", "Add Product clicked")  // Лог 4 (адаптировал)
-            startActivity(Intent(requireContext(), AddProductsActivity::class.java))
-        }
-
-        // Кнопка Logout (используем shared ViewModel)
-        binding.btnLogout.setOnClickListener {
-            Log.d("HomeFragment", "Logout clicked")  // Лог 5 (адаптирован)
-            viewModel.logout()
-            Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
-            requireActivity().finish()  // Закрываем Activity
+        binding.btnAddDish.setOnClickListener {
+            startActivity(Intent(requireContext(), AddDishActivity::class.java))
         }
 
         Log.d("HomeFragment", "onViewCreated finished")

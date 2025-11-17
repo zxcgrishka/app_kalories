@@ -2,15 +2,13 @@ package com.example.test2  // Твоя package
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log  // Для лога
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.example.test2.data.AppDatabase
-import com.example.test2.data.UserRepository
+import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityLoginBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
@@ -27,10 +25,9 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         try {
             Log.d("LoginActivity", "onCreate started")  // Лог 1
-
-            // Создай repository перед ViewModel
+            val database = AppDatabase.getDatabase(this)
             repository = UserRepository(
-                AppDatabase.getDatabase(this).userDao(),
+                database,
                 NetworkModule.provideMyApiService(this),
                 this
             )

@@ -2,7 +2,6 @@ package com.example.test2.network
 
 import android.content.Context
 import android.net.Uri
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -40,7 +39,7 @@ class NutritionixRepository(private val service: NutritionixService) {
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
         val bytes = inputStream?.readBytes() ?: byteArrayOf()
 
-        val requestFile = RequestBody.create(
+        val requestFile = RequestBody.Companion.create(
             "image/jpeg".toMediaType(), // ← ИСПРАВЛЕНО ЗДЕСЬ
             bytes
         )

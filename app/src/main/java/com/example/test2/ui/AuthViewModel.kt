@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.test2.data.UserRepository
+import com.example.test2.data.User.UserRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val repository: UserRepository, private val context: Context) : ViewModel() {

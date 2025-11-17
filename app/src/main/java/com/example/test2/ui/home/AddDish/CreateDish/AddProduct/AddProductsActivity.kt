@@ -1,20 +1,23 @@
-package com.example.test2
+package com.example.test2.ui.home.AddDish.CreateDish.AddProduct
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asLiveData
+import com.example.test2.data.AppDatabase
+import com.example.test2.ui.home.AddDish.CreateDish.AddProduct.Product
 import com.example.test2.databinding.ActivityAddProductsBinding
 import com.example.test2.network.NetworkModule
+import com.example.test2.network.NutritionixFood
 import com.example.test2.network.NutritionixRepository
 import com.example.test2.utils.CameraActivity
-import com.example.test2.ProductDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -56,10 +59,10 @@ class AddProductsActivity : AppCompatActivity() {
         binding = ActivityAddProductsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val db = MainDb.getDb(this)
+        val db = AppDatabase.getDatabase(this)
 
         // Наблюдатель за списком продуктов
-        db.getDao().getAllProducts().asLiveData().observe(this) { products ->
+        db.productDao().getAllProducts().asLiveData().observe(this) { products ->
             binding.tvList.text = ""
             products.forEach { product ->
                 val text = "Id: ${product.id} Name: ${product.ProductName} " +
@@ -92,7 +95,7 @@ class AddProductsActivity : AppCompatActivity() {
         }
     }
 
-    private fun addProductManually(db: MainDb) {
+    private fun addProductManually(db: AppDatabase) {
         println("DEBUG: addProductManually called")
 
         // Проверим все поля
@@ -122,7 +125,7 @@ class AddProductsActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                db.getDao().insert(product)
+                db.productDao().insert(product)
 
                 withContext(Dispatchers.Main) {
                     clearInputFields()
@@ -176,6 +179,7 @@ class AddProductsActivity : AppCompatActivity() {
                                 showFoodSelectionDialog(foods)
                             }
                         }
+
                         result.isFailure -> {
                             val error = result.exceptionOrNull()
                             if (error?.message?.contains("API error: 404") == true) {
@@ -197,10 +201,10 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun showTextSearchDialog() {
-        val input = android.widget.EditText(this)
+        val input = EditText(this)
         input.hint = "Например: яблоко, куриная грудка, банан"
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Поиск продукта")
             .setMessage("Введите название продукта для поиска в Nutritionix:")
             .setView(input)
@@ -238,6 +242,7 @@ class AddProductsActivity : AppCompatActivity() {
                                 showFoodSelectionDialog(foods)
                             }
                         }
+
                         result.isFailure -> {
                             val error = result.exceptionOrNull()
                             showErrorFallback("Ошибка поиска: ${error?.message}")
@@ -254,12 +259,12 @@ class AddProductsActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFoodSelectionDialog(foods: List<com.example.test2.network.NutritionixFood>) {
+    private fun showFoodSelectionDialog(foods: List<NutritionixFood>) {
         val foodNames = foods.mapIndexed { index, food ->
             "${index + 1}. ${food.food_name} - ${food.nf_calories?.toInt() ?: 0} ккал"
         }
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Выберите продукт")
             .setItems(foodNames.toTypedArray()) { dialog, which ->
                 val selectedFood = foods[which]
@@ -276,7 +281,7 @@ class AddProductsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showFoodDetailsDialog(foods: List<com.example.test2.network.NutritionixFood>) {
+    private fun showFoodDetailsDialog(foods: List<NutritionixFood>) {
         val foodDetails = foods.joinToString("\n\n") { food ->
             """
             🍽 ${food.food_name}
@@ -288,7 +293,7 @@ class AddProductsActivity : AppCompatActivity() {
             """.trimIndent()
         }
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Найденные продукты")
             .setMessage(foodDetails)
             .setPositiveButton("Выбрать первый") { dialog, _ ->
@@ -301,7 +306,7 @@ class AddProductsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun fillFieldsWithNutritionixData(food: com.example.test2.network.NutritionixFood) {
+    private fun fillFieldsWithNutritionixData(food: NutritionixFood) {
         binding.edName?.setText(food.food_name)
         binding.edKalories.setText((food.nf_calories?.toInt() ?: 0).toString())
         binding.edProteins?.setText((food.nf_protein?.toInt() ?: 0).toString())
@@ -332,7 +337,7 @@ class AddProductsActivity : AppCompatActivity() {
     private fun showErrorFallback(errorMessage: String) {
         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Ошибка")
             .setMessage("$errorMessage\nХотите ввести данные вручную?")
             .setPositiveButton("Ввести вручную") { dialog, _ ->
@@ -351,7 +356,7 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun showManualInputFallback(message: String) {
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle("Информация")
             .setMessage("$message\nВведите данные вручную или попробуйте текстовый поиск")
             .setPositiveButton("Ввести вручную") { dialog, _ ->

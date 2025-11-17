@@ -1,12 +1,15 @@
 package com.example.test2.ui.profile  // Твой package
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.example.test2.LoginActivity
 import com.example.test2.MainActivity  // Импорт для cast к Activity
 import com.example.test2.databinding.FragmentProfileBinding
 import com.example.test2.ui.AuthViewModel
@@ -26,6 +29,7 @@ class ProfileFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         return binding.root
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -46,6 +50,14 @@ class ProfileFragment : Fragment() {
         binding.btnEditProfile.setOnClickListener {
             Log.d("ProfileFragment", "Edit profile clicked")
             // Здесь добавь диалог или Intent для редактирования
+        }
+
+        binding.btnLogout.setOnClickListener {
+            Log.d("HomeFragment", "Logout clicked")
+            viewModel.logout()
+            Toast.makeText(requireContext(), "Logged out", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            requireActivity().finish()  // Закрываем Activity
         }
 
         Log.d("ProfileFragment", "onViewCreated finished")

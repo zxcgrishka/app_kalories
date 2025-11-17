@@ -2,8 +2,7 @@ package com.example.test2.ui  // Твоя package
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.test2.data.UserRepository
-import com.example.test2.ui.AuthViewModel
+import com.example.test2.data.User.UserRepository
 import android.content.Context
 
 class AuthViewModelFactory(

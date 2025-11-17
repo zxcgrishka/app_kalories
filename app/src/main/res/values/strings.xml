@@ -7,4 +7,5 @@
     <string name="add_product">Add Product</string>
     <string name="logout">Logout</string>
     <string name="calendar_fragment">Calendar Fragment</string>
+    <string name="add_dish">add dish</string>
 </resources>

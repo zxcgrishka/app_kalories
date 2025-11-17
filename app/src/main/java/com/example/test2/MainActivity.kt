@@ -8,7 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.test2.data.AppDatabase
-import com.example.test2.data.UserRepository
+import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityMainBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
@@ -25,10 +25,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("MainActivity", "onCreate started")
-
+        val database = AppDatabase.getDatabase(this)
         try {
             repository = UserRepository(
-                AppDatabase.getDatabase(this).userDao(),
+                database,
                 NetworkModule.provideMyApiService(this),
                 this
             )
