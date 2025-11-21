@@ -3,6 +3,8 @@ package com.example.test2.data.User
 import android.content.Context
 import android.util.Log
 import com.example.test2.data.AppDatabase
+import com.example.test2.data.DailyMeal.DailyMeal
+import com.example.test2.data.DailyMealDao
 import com.example.test2.data.Meal
 import com.example.test2.data.MealDao
 import com.example.test2.network.ApiService
@@ -22,6 +24,8 @@ class UserRepository(
     private val Userdao = database.userDao()
     private val MealDao = database.mealDao()
     private val ProductDao = database.productDao()
+    private val DailyMealDao = database.dailyMealDao()
+
 
 
     fun getAllUsers(): Flow<List<User>> = Userdao.getAllUsers()
@@ -96,6 +100,15 @@ class UserRepository(
         TokenManager.clearToken(context)
         Userdao.clearAll()
     }
+
+    fun getTodayDailyMealsByUser(userId: Long): Flow<List<DailyMeal>> = DailyMealDao.getTodayDailyMealsByUser(userId)
+    suspend fun insertDailyMeal(dailyMeal: DailyMeal) {
+        DailyMealDao.insertDailyMeal(dailyMeal)
+    }
+    suspend fun clearDailyMealsByUser(userId: Long) {
+        DailyMealDao.clearDailyMealsByUser(userId)
+    }
+
 
     private fun hashPassword(password: String): String {
         return BCrypt.hashpw(password, BCrypt.gensalt())

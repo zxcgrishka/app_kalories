@@ -6,15 +6,19 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.test2.data.AppDatabase
+import com.example.test2.data.DailyMeal.DailyMeal
 import com.example.test2.data.Meal
 import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityAddDishBinding
 import com.example.test2.network.NetworkModule
+import com.example.test2.ui.MealAdapter
 import com.example.test2.ui.MealViewModelFactory
-import com.example.test2.ui.home.AddDish.MealAdapter
-import com.example.test2.ui.home.MealViewModel
+import com.example.test2.ui.home.AddDish.CreateDish.MealViewModel
+import kotlinx.coroutines.launch
+import java.util.Date
 
 class AddDishActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddDishBinding
@@ -23,6 +27,12 @@ class AddDishActivity : AppCompatActivity() {
     private lateinit var adapter: MealAdapter
 
     private var userId = -1L
+    private var selectedMeals = mutableListOf<Meal>()
+    private var totalCalories = 0
+
+    companion object {
+        const val CREATE_DISH_REQUEST_CODE = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +51,6 @@ class AddDishActivity : AppCompatActivity() {
             this
         )
 
-        // ViewModel для Meal
         mealViewModel = viewModels<MealViewModel> {
             MealViewModelFactory(localRepository)
         }.value
@@ -49,39 +58,60 @@ class AddDishActivity : AppCompatActivity() {
         setupRecyclerView()
         loadMeals()
 
-        // Кнопка "Создать новое блюдо"
+        binding.btnReady.setOnClickListener {
+            if (selectedMeals.isNotEmpty()) {
+                val dailyMeal = DailyMeal(
+                    userId = userId,
+                    date = Date(),
+                    totalCalories = totalCalories,
+                    mealIds = selectedMeals.map { it.id }.joinToString(",")
+                )
+                lifecycleScope.launch {
+                    localRepository.insertDailyMeal(dailyMeal)
+                    Log.d("AddDishActivity", "DailyMeal saved: $totalCalories кал")
+                    setResult(RESULT_OK)
+                    finish()
+                }
+            } else {
+                Log.w("AddDishActivity", "No meals selected")
+            }
+        }
         binding.btnCreateDish.setOnClickListener {
-            Log.d("AddDishActivity", "btnCreateDish clicked")
+            Log.d("AddDishActivity", "btnCreateDish clicked — redirecting to CreateDish")
             val intent = Intent(this, CreateDishActivity::class.java)
-            intent.putExtra("userId", userId)  // Передай userId
-            startActivityForResult(intent, CREATE_DISH_REQUEST_CODE)  // НОВОЕ: ForResult для обновления
+            intent.putExtra("userId", userId)
+            startActivityForResult(intent, CREATE_DISH_REQUEST_CODE)
         }
 
         Log.d("AddDishActivity", "onCreate finished")
     }
 
-    // НОВОЕ: Обработка возврата из CreateDish
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CREATE_DISH_REQUEST_CODE && resultCode == RESULT_OK) {
-            Log.d("AddDishActivity", "Dish created — reloading list")
-            loadMeals()  // Перезагрузи список
+            Log.d("AddDishActivity", "New dish created — reloading meals")
+            loadMeals()
         }
     }
 
     private fun setupRecyclerView() {
-        adapter = MealAdapter { meal ->  // Callback для клика на блюдо (напр. редактирование)
-            Log.d("AddDishActivity", "Meal clicked: ${meal.name}")
-            // Твоя логика (Intent на детали блюда)
+        adapter = MealAdapter { meal, isSelected ->
+            if (isSelected) {
+                selectedMeals.add(meal)
+                totalCalories += meal.calories
+            } else {
+                selectedMeals.remove(meal)
+                totalCalories -= meal.calories
+            }
         }
-        binding.rvMeals.layoutManager = LinearLayoutManager(this)  // rvMeals — id в XML
+        binding.rvMeals.layoutManager = LinearLayoutManager(this)
         binding.rvMeals.adapter = adapter
     }
 
     private fun loadMeals() {
         mealViewModel.loadMeals(userId)
         mealViewModel.meals.observe(this) { meals ->
-            adapter.updateMeals(meals)  // Adapter для Meal (создай ниже)
+            adapter.updateMeals(meals)
             Log.d("AddDishActivity", "Loaded ${meals.size} meals")
         }
     }
@@ -89,9 +119,5 @@ class AddDishActivity : AppCompatActivity() {
     private fun getUserIdFromPrefs(): Long {
         val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         return sharedPref.getLong("current_user_id", -1L)
-    }
-
-    companion object {
-        const val CREATE_DISH_REQUEST_CODE = 1001  // Код для onActivityResult
     }
 }

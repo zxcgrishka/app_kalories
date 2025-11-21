@@ -25,6 +25,12 @@
         tools:listitem="@layout/item_meal" />
 
     <Button
+        android:id="@+id/btnReady"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Готово" />
+
+    <Button
         android:id="@+id/btnCreateDish"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

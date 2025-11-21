@@ -1,4 +1,4 @@
-package com.example.test2.ui.home.AddDish
+package com.example.test2.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,15 +6,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.test2.data.Meal
 import com.example.test2.databinding.ItemMealBinding
 
-class MealAdapter(private val onMealClicked: (Meal) -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
+class MealAdapter(private val onSelected: (Meal, Boolean) -> Unit) : RecyclerView.Adapter<MealAdapter.ViewHolder>() {
     private var meals = listOf<Meal>()
 
     class ViewHolder(private val binding: ItemMealBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(meal: Meal, onClicked: (Meal) -> Unit) {
+        fun bind(meal: Meal, onSelected: (Meal, Boolean) -> Unit) {
             binding.tvMealName.text = meal.name
             binding.tvMealCalories.text = "${meal.calories} ккал"
-            binding.tvMealDate.text = meal.date.toString()  // Форматируй, напр. SimpleDateFormat
-            binding.root.setOnClickListener { onClicked(meal) }
+            binding.cbMeal.isChecked = false
+            binding.cbMeal.setOnCheckedChangeListener { _, isChecked ->
+                onSelected(meal, isChecked)
+            }
         }
     }
 
@@ -24,7 +26,7 @@ class MealAdapter(private val onMealClicked: (Meal) -> Unit) : RecyclerView.Adap
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(meals[position], onMealClicked)
+        holder.bind(meals[position], onSelected)
     }
 
     override fun getItemCount() = meals.size
