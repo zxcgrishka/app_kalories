@@ -98,7 +98,7 @@ class CreateDishActivity : AppCompatActivity() {
                 selectedProducts.remove(product)
                 totalCalories -= product.ProductCalories
             }
-            binding.tvTotalCalories.text = "Общие калории: $totalCalories"
+            binding.tvTotalCalories.text = "$totalCalories"
             Log.d("CreateDishActivity", "Selected: ${product.ProductName}, total: $totalCalories")
         }
         binding.rvProducts.layoutManager = LinearLayoutManager(this)

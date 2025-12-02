@@ -23,7 +23,9 @@
             android:id="@+id/tvMealName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/khula_light"
             android:text="Завтрак"
+            android:textColor="@color/c5"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -32,15 +34,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="500 ккал"
-            android:textColor="#666"
+            android:textColor="@color/c5"
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tvMealDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/khula_bold"
             android:text="17.11.2025"
-            android:textColor="#999"
+            android:textColor="@color/c5"
             android:textSize="14sp" />
 
     </LinearLayout>

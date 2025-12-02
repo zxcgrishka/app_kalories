@@ -38,7 +38,7 @@
         android:fontFamily="@font/khula_regular"
         android:insetTop="4dp"
         android:insetBottom="4dp"
-        android:text="cоздать блюдо"
+        android:text="создать блюдо"
         android:textAlignment="center"
         android:textColor="@color/c5"
         android:textColorLink="@color/c1"

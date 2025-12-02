@@ -5,151 +5,162 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
     tools:context=".ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity">
 
     <!-- Кнопка камеры -->
-    <TextView
-        android:id="@+id/tvList"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="#f0f0f0"
-        android:gravity="center"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/btnOpenCamera"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Кнопка галереи -->
-    <Button
-        android:id="@+id/btnOpenCamera"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:drawableStart="@android:drawable/ic_menu_camera"
-        android:text="Сфотографировать продукт"
-        app:layout_constraintBottom_toTopOf="@+id/btnOpenGallery"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvList" />
-
-    <Button
-        android:id="@+id/btnOpenGallery"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:text="Выбрать из галереи"
-        android:drawableStart="@android:drawable/ic_menu_gallery"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOpenCamera"
-        app:layout_constraintBottom_toTopOf="@+id/edName" />
-
-    <EditText
-        android:id="@+id/edName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:ems="10"
-        android:hint="Name"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/edKalories"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/edKalories"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:ems="10"
-        android:hint="Kalories"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/edProteins"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/edProteins"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="16dp"
-        android:ems="10"
-        android:hint="Proteins"
-        android:inputType="text"
-        app:layout_constraintBottom_toTopOf="@+id/button2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/edFats"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintHorizontal_weight="1" />
-
-    <EditText
-        android:id="@+id/edFats"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:ems="10"
-        android:hint="Fats"
-        android:inputType="text"
-        app:layout_constraintTop_toTopOf="@+id/edProteins"
-        app:layout_constraintBottom_toBottomOf="@+id/edProteins"
-        app:layout_constraintStart_toEndOf="@+id/edProteins"
-        app:layout_constraintEnd_toStartOf="@+id/edCarbohydrates"
-        app:layout_constraintHorizontal_weight="1" />
-
-    <EditText
-        android:id="@+id/edCarbohydrates"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:ems="10"
-        android:hint="Carbohydrates"
-        android:inputType="text"
-        app:layout_constraintTop_toTopOf="@+id/edFats"
-        app:layout_constraintBottom_toBottomOf="@+id/edFats"
-        app:layout_constraintStart_toEndOf="@+id/edFats"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1" />
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="Save"
+        android:layout_width="299dp"
+        android:layout_height="65dp"
+        android:layout_marginBottom="60dp"
+        android:background="@drawable/gradient_button_green"
+        android:fontFamily="@font/khula_bold"
+        android:insetTop="4dp"
+        android:insetBottom="4dp"
+        android:text="Готово"
+        android:textAlignment="center"
+        android:textColor="@color/c1"
+        android:textSize="24sp"
+        app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/btnTextSearch"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:text="Поиск по названию"
-        android:drawableStart="@android:drawable/ic_search_category_default"
+    <TextView
+        android:id="@+id/tvList"
+        android:layout_width="379dp"
+        android:layout_height="100dp"
+        android:background="#f0f0f0"
+        android:gravity="center"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <!-- Кнопка галереи -->
+
+    <ImageButton
+        android:id="@+id/btnOpenCamera"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="56dp"
+        android:background="@drawable/gradient_button_green"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+        app:srcCompat="@drawable/makephoto" />
+
+    <ImageButton
+        android:id="@+id/btnOpenGallery"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:background="@drawable/gradient_button_green"
+        android:padding="15dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="@+id/btnOpenCamera"
+        app:layout_constraintEnd_toStartOf="@+id/imageButton3"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btnOpenCamera"
+        app:srcCompat="@drawable/gallery" />
+
+    <ImageButton
+        android:id="@+id/imageButton3"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/gradient_button_green"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="@+id/btnOpenCamera"
+        app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+        app:srcCompat="@drawable/findbytext" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="365dp"
+        android:layout_height="216dp"
+        android:layout_marginBottom="36dp"
+        android:background="@drawable/nogradient_button_green"
+        android:elevation="8dp"
+        android:padding="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/button2"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOpenGallery" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/edName"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:ems="10"
+            android:hint="Название"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColor="@color/c5"
+            android:textColorHint="@color/c5"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edProteins"
+            android:layout_width="89dp"
+            android:layout_height="49dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="белки"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColorHint="@color/c5"
+            app:layout_constraintStart_toStartOf="@+id/edName"
+            app:layout_constraintTop_toBottomOf="@+id/edName" />
+
+        <EditText
+            android:id="@+id/edFats"
+            android:layout_width="89dp"
+            android:layout_height="49dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="жиры"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColorHint="@color/c5"
+            app:layout_constraintEnd_toStartOf="@+id/edCarbohydrates"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/edProteins"
+            app:layout_constraintTop_toBottomOf="@+id/edName" />
+
+        <EditText
+            android:id="@+id/edCarbohydrates"
+            android:layout_width="89dp"
+            android:layout_height="49dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="углеводы"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColorHint="@color/c5"
+            app:layout_constraintEnd_toEndOf="@+id/edName"
+            app:layout_constraintTop_toBottomOf="@+id/edName" />
+
+        <EditText
+            android:id="@+id/edKalories"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="16dp"
+            android:ems="10"
+            android:hint="калорийность"
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColorHint="@color/c5"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edFats" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
