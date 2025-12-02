@@ -10,6 +10,31 @@
 
     <!-- Кнопка камеры -->
 
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="205dp"
+        android:layout_height="75dp"
+        android:layout_marginStart="136dp"
+        android:layout_marginTop="52dp"
+        android:fontFamily="@font/khula_bold"
+        android:gravity="center"
+        android:text="Добавить продукт"
+        android:textAlignment="textStart"
+        android:textColor="@color/c5"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView9"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginEnd="14dp"
+        android:src="@drawable/icon2_2"
+        app:layout_constraintEnd_toStartOf="@+id/textView14"
+        app:layout_constraintTop_toTopOf="@+id/textView14" />
+
     <Button
         android:id="@+id/button2"
         android:layout_width="299dp"
@@ -21,30 +46,34 @@
         android:insetBottom="4dp"
         android:text="Готово"
         android:textAlignment="center"
-        android:textColor="@color/c1"
+        android:textColor="@color/white"
         android:textSize="24sp"
         app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- Кнопка галереи -->
+
     <TextView
         android:id="@+id/tvList"
-        android:layout_width="379dp"
-        android:layout_height="100dp"
+        android:layout_width="318dp"
+        android:layout_height="81dp"
         android:background="#f0f0f0"
         android:gravity="center"
         android:text="TextView"
-        tools:layout_editor_absoluteX="16dp" />
-
-    <!-- Кнопка галереи -->
+        app:layout_constraintBottom_toTopOf="@+id/btnOpenCamera"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView14"
+        app:layout_constraintVertical_bias="0.48" />
 
     <ImageButton
         android:id="@+id/btnOpenCamera"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="56dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/gradient_button_green"
         android:padding="10dp"
         android:scaleType="centerInside"
@@ -69,7 +98,6 @@
         android:id="@+id/imageButton3"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginEnd="12dp"
         android:background="@drawable/gradient_button_green"
         android:padding="8dp"
         android:scaleType="centerInside"
@@ -79,14 +107,15 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
-        android:layout_width="365dp"
+        android:layout_width="318dp"
         android:layout_height="216dp"
-        android:layout_marginBottom="36dp"
-        android:background="@drawable/nogradient_button_green"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/nogradient_button_c2"
         android:elevation="8dp"
-        android:padding="12dp"
+        android:padding="6dp"
         app:layout_constraintBottom_toTopOf="@+id/button2"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintStart_toStartOf="parent">
 
         <EditText
@@ -94,10 +123,12 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:ems="10"
+            android:foreground="@color/c5"
             android:hint="Название"
             android:inputType="text"
             android:textAlignment="center"
             android:textColor="@color/c5"
+            android:textColorHighlight="@color/c5"
             android:textColorHint="@color/c5"
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -114,6 +145,7 @@
             android:hint="белки"
             android:inputType="text"
             android:textAlignment="center"
+            android:textColor="@color/c5"
             android:textColorHint="@color/c5"
             app:layout_constraintStart_toStartOf="@+id/edName"
             app:layout_constraintTop_toBottomOf="@+id/edName" />
@@ -127,6 +159,7 @@
             android:hint="жиры"
             android:inputType="text"
             android:textAlignment="center"
+            android:textColor="@color/c5"
             android:textColorHint="@color/c5"
             app:layout_constraintEnd_toStartOf="@+id/edCarbohydrates"
             app:layout_constraintHorizontal_bias="0.5"
@@ -142,6 +175,7 @@
             android:hint="углеводы"
             android:inputType="text"
             android:textAlignment="center"
+            android:textColor="@color/c5"
             android:textColorHint="@color/c5"
             app:layout_constraintEnd_toEndOf="@+id/edName"
             app:layout_constraintTop_toBottomOf="@+id/edName" />
@@ -155,6 +189,7 @@
             android:hint="калорийность"
             android:inputType="text"
             android:textAlignment="center"
+            android:textColor="@color/c5"
             android:textColorHint="@color/c5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

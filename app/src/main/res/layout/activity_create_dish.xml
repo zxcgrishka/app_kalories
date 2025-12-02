@@ -98,6 +98,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/khula_bold"
         android:text="Всего ККАЛ:"
+        android:textColor="@color/c5"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/etDishName"
