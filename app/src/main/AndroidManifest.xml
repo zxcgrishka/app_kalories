@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Разрешения -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +22,7 @@
         tools:targetApi="31"
         android:usesCleartextTraffic="true">
 
-        <!-- MainActivity пока что стартовая -->
+        <!-- Стартовая Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -32,32 +33,40 @@
             </intent-filter>
         </activity>
 
-        <!-- LoginActivity — обычная activity -->
+        <!-- Логин -->
         <activity
             android:name=".LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.Test2" />
 
-        <!-- RegisterActivity — для перехода из Login -->
+        <!-- Регистрация -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
             android:theme="@style/Theme.Test2" />
 
+        <!-- Экран добавления продуктов (YOLO) -->
         <activity
             android:name=".ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <!-- Экран создания блюда -->
+        <activity
+            android:name=".CreateDishActivity"
             android:exported="false" />
 
-        <activity android:name=".CreateDishActivity"
-            android:exported="false" />
-        <activity android:name=".AddDishActivity"
+        <!-- Экран выбора блюд на день -->
+        <activity
+            android:name=".AddDishActivity"
             android:exported="false" />
 
-        <!-- activity для камеры -->
+        <!-- Камера (делает фото, возвращает URI) -->
         <activity
             android:name=".utils.CameraActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:launchMode="singleTop" />
 
     </application>
-</manifest>
 
+</manifest>
