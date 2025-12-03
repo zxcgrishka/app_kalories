@@ -1,104 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:gravity="center">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_marginTop="20pt"
-        android:layout_marginBottom="80pt"
-        android:foregroundGravity="top"
-        android:gravity="top">
-
-        <ImageView
-            android:id="@+id/imageView9"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="48dp"
-            android:layout_marginBottom="57dp"
-            app:srcCompat="@drawable/start_control_your_meals_now" />
-
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="65dp"
-            app:srcCompat="@drawable/app_name" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="445dp"
+        android:layout_height="456dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/imageView5"
-            android:layout_width="107dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="235dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/textView"
+            app:layout_constraintTop_toTopOf="@+id/textView"
             app:srcCompat="@drawable/icon2_2" />
 
-        <ImageView
-            android:id="@+id/imageView8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="55dp"
-            android:layout_marginEnd="103dp"
-            app:srcCompat="@drawable/greetings_text" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="176dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="188dp"
+            android:layout_marginTop="60dp"
+            android:fontFamily="@font/khula_bold"
+            android:text="App Name"
+            android:textAlignment="center"
+            android:textColor="@color/c5"
+            android:textSize="34sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="156dp"
+            android:layout_height="31dp"
+            android:fontFamily="@font/khula_light"
+            android:text="Greetings text"
+            android:textAlignment="center"
+            android:textColor="@color/c5"
+            android:textSize="24sp"
+            app:layout_constraintStart_toStartOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="248dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="44dp"
+            android:fontFamily="@font/khula_light"
+            android:text="Start control your meals"
+            android:textAlignment="center"
+            android:textColor="@color/c5"
+            android:textSize="24sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView5" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="65dp"
+            android:layout_height="32dp"
+            android:fontFamily="@font/khula_bold"
+            android:text="now"
+            android:textAlignment="center"
+            android:textColor="@color/c3"
+            android:textSize="24sp"
+            app:layout_constraintStart_toEndOf="@+id/textView3"
+            app:layout_constraintTop_toTopOf="@+id/textView3" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <EditText
         android:id="@+id/etUsername"
-        android:layout_width="320dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_width="227dp"
+        android:layout_height="67dp"
+        android:layout_marginBottom="24dp"
+        android:breakStrategy="simple"
+        android:drawableTintMode="src_atop"
         android:fontFamily="@font/khula_light"
+        android:foregroundTintMode="multiply"
         android:hint="Username"
         android:inputType="text"
-        android:textSize="24sp" />
+        android:textColor="@color/c5"
+        android:textColorHighlight="@color/c5"
+        android:textColorHint="@color/c5"
+        android:textColorLink="@color/c3"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/etPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
         android:id="@+id/etPassword"
-        android:layout_width="320dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_width="227dp"
+        android:layout_height="67dp"
+        android:layout_marginBottom="24dp"
         android:fontFamily="@font/khula_light"
         android:hint="Password"
         android:inputType="textPassword"
-        android:textSize="24sp" />
+        android:textColor="@color/c5"
+        android:textColorHint="@color/c5"
+        android:textColorLink="@color/c3"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnRegister"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnRegister"
-        android:layout_width="320dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_width="214dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="40dp"
         android:background="@drawable/gradient_button_green"
         android:fontFamily="@font/khula_bold"
+        android:insetTop="4dp"
+        android:insetBottom="4dp"
         android:text="Register"
+        android:textAlignment="center"
+        android:textColor="@color/c1"
         android:textSize="24sp"
-        app:backgroundTint="@null" />
+        app:backgroundTint="@null"
+        app:layout_constraintBottom_toTopOf="@+id/tvLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tvLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20pt"
+        android:layout_marginBottom="48dp"
         android:clickable="true"
         android:focusable="true"
         android:fontFamily="@font/khula_light"
         android:foreground="?attr/selectableItemBackground"
         android:text="Already have an account? Login"
-        android:textSize="20sp"/>
+        android:textColor="@color/c5"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

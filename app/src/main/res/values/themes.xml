@@ -1,17 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- БАЗОВАЯ тема (настройки) -->
     <style name="Base.Theme.Test2" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <item name="android:statusBarColor">#F5F5F5</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">#E3F3FC</item>
-        <item name="android:windowLightNavigationBar">false</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/icon2_2</item>
-        <item name="android:windowSplashScreenBackground">#E3F3FC</item>
-        <item name="android:windowSplashScreenAnimationDuration">1000</item>
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="dynamicColorThemeOverlay">@null</item>
+        <item name="colorPrimary">@color/c1</item>
+        <item name="colorPrimaryVariant">@color/c5</item>
+
+        <!-- Для прозрачной навигации -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!-- Для прозрачного статус-бара -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
-    <style name="Theme.Test2" parent="Base.Theme.Test2" />
 </resources>

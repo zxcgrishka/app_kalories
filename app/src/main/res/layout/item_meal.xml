@@ -4,25 +4,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:background="@drawable/gradient_background"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/c1"
         android:orientation="vertical"
         android:padding="16dp">
 
         <CheckBox
-        android:id="@+id/cbMeal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            android:id="@+id/cbMeal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/c5" />
 
         <TextView
             android:id="@+id/tvMealName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:fontFamily="@font/khula_light"
             android:text="Завтрак"
+            android:textColor="@color/c5"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -30,17 +36,20 @@
             android:id="@+id/tvMealCalories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
             android:text="500 ккал"
-            android:textSize="16sp"
-            android:textColor="#666" />
+            android:textColor="@color/c5"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tvMealDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:fontFamily="@font/khula_bold"
             android:text="17.11.2025"
-            android:textSize="14sp"
-            android:textColor="#999" />
+            android:textColor="@color/c5"
+            android:textSize="14sp" />
 
     </LinearLayout>
 

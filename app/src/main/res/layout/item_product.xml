@@ -8,22 +8,26 @@
     <CheckBox
         android:id="@+id/cbProduct"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/c5" />
 
     <TextView
         android:id="@+id/tvProductName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_weight="1"
+        android:fontFamily="@font/khula_regular"
         android:text="Продукт"
-        android:textSize="16sp"
-        android:layout_marginStart="8dp" />
+        android:textColor="@color/c5"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tvProductCalories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="100 ккал"
+        android:textColor="@color/c5"
         android:textSize="14sp" />
 
 </LinearLayout>

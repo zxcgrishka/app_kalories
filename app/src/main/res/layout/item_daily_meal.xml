@@ -4,12 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:background="@color/c2"
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/c2"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -18,14 +20,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="17.11.2025"
-            android:textSize="14sp"
-            android:textColor="#999" />
+            android:textColor="@color/c5"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/tvDailyMealCalories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/khula_regular"
             android:text="1500 ккал"
+            android:textColor="@color/c5"
             android:textSize="18sp"
             android:textStyle="bold" />
 
