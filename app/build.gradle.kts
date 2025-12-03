@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-
 }
 
 android {
@@ -35,10 +34,14 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 dependencies {
-
     // AndroidX & Material
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -58,12 +61,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation(libs.okhttp)
-    implementation(libs.androidx.security.crypto)
-    implementation(libs.jbcrypt)
-    implementation(libs.logging.interceptor)
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -80,13 +77,34 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.exifinterface)
 
-    // Nutritionix
-    implementation(libs.glide.library)
-    implementation(libs.commons.codec.library)
-    implementation(libs.androidx.exifinterface)
-
     // Navigation
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.navigation.compose)
+
+    // === НОВЫЕ ЗАВИСИМОСТИ ДЛЯ ЛОКАЛЬНОЙ НЕЙРОСЕТИ ===
+
+    // TensorFlow Lite с GPU делегацией для ускорения
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+
+    // Для работы с изображениями
+    implementation("io.coil-kt:coil:2.4.0")
+
+    // ML Kit для дополнительных возможностей
+    implementation("com.google.mlkit:image-labeling:17.0.7")
+    implementation("com.google.mlkit:object-detection:17.0.0")
+
+
+    // Для работы с изображениями
+    implementation("io.coil-kt:coil:2.4.0")
+
+    // Ваши существующие сетевые зависимости (оставляем для вашего бэкенда)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.jbcrypt)
+    implementation(libs.logging.interceptor)
 }
