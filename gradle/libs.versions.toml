@@ -28,6 +28,8 @@ navigation = "2.7.6"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
+tflite = "2.17.0"
+litertSupport = "1.4.1"
 
 
 # Новые версии для камеры и Nutritionix
@@ -87,6 +89,8 @@ androidx-camera-core = { group = "androidx.camera", name = "camera-core", versio
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "androidx-camera" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "androidx-camera" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "androidx-camera" }
+tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tflite" }
+litert-support = { group = "com.google.ai.edge.litert", name = "litert-support", version.ref = "litertSupport" }
 
 # Для обработки изображений
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "androidx-exifinterface" }
