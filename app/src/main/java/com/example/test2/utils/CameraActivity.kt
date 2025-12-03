@@ -15,7 +15,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.test2.databinding.ActivityCameraBinding
 import java.text.SimpleDateFormat
@@ -24,34 +23,30 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityCameraBinding
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
 
-    // список разрешений для разных версий Android
+    // Разрешения
     private val requiredPermissions = arrayOf(
         android.Manifest.permission.CAMERA
-    ).apply {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            plus(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-    }
+    )
 
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions.all { it.value }) {
-            // Все разрешения предоставлены
-            startCamera()
-        } else {
-            // Некоторые разрешения не предоставлены
-            Toast.makeText(this,
-                "Для работы камеры необходимо предоставить разрешения",
-                Toast.LENGTH_LONG
-            ).show()
-            finish()
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { perms ->
+            val allGranted = perms.all { it.value }
+            if (allGranted) {
+                startCamera()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Для работы камеры нужно выдать разрешения",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,20 +55,19 @@ class CameraActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        // Проверяем разрешения
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            // Запрашиваем разрешения
-            requestPermissionLauncher.launch(requiredPermissions)
+            permissionLauncher.launch(requiredPermissions)
         }
 
         binding.captureButton.setOnClickListener {
             if (allPermissionsGranted()) {
                 takePhoto()
             } else {
-                Toast.makeText(this,
-                    "Сначала предоставьте разрешения для камеры",
+                Toast.makeText(
+                    this,
+                    "Нет разрешений на камеру",
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -84,21 +78,21 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun allPermissionsGranted() = requiredPermissions.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+    private fun allPermissionsGranted(): Boolean {
+        return requiredPermissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
     }
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val cameraProvider = cameraProviderFuture.get()
 
             val preview = Preview.Builder()
                 .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
+                .also { it.setSurfaceProvider(binding.viewFinder.surfaceProvider) }
 
             imageCapture = ImageCapture.Builder().build()
 
@@ -107,24 +101,28 @@ class CameraActivity : AppCompatActivity() {
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
+                    this,
+                    cameraSelector,
+                    preview,
+                    imageCapture
                 )
-            } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
+            } catch (e: Exception) {
+                Log.e(TAG, "Use case binding failed", e)
                 Toast.makeText(this, "Ошибка инициализации камеры", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
     private fun takePhoto() {
-        val imageCapture = imageCapture ?: return
+        val capture = imageCapture ?: return
 
         val name = SimpleDateFormat(FILENAME_FORMAT, Locale.US)
             .format(System.currentTimeMillis())
+
         val contentValues = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CalorieCounter")
             }
         }
@@ -135,7 +133,7 @@ class CameraActivity : AppCompatActivity() {
             contentValues
         ).build()
 
-        imageCapture.takePicture(
+        capture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
@@ -150,11 +148,14 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = output.savedUri
-                    val msg = "Фото сохранено"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, "Photo saved: $savedUri")
 
-                    // Возвращаем результат
+                    Toast.makeText(
+                        this@CameraActivity,
+                        "Фото сохранено",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
                     val resultIntent = Intent().apply {
                         putExtra("photo_uri", savedUri.toString())
                     }

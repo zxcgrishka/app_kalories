@@ -10,53 +10,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object NetworkModule {
-    // Базовые URL
-    private const val NUTRITIONIX_BASE_URL = "https://trackapi.nutritionix.com/"
-    private const val YOUR_API_BASE_URL = "http://10.0.2.2:8000/" // ваш бэкенд
-
-    // Nutritionix ключи
-    const val NUTRITIONIX_APP_ID = "fbc0468d"
-    const val NUTRITIONIX_APP_KEY = "5d1c75eb69b673a3c85f2662b22005f4"
-
-    // ===== NUTRITIONIX API =====
-    fun provideNutritionixService(): NutritionixService {
-        return provideNutritionixRetrofit().create(NutritionixService::class.java)
-    }
-
-    private fun provideNutritionixRetrofit(): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(NUTRITIONIX_BASE_URL)
-            .client(provideNutritionixOkHttpClient())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    private fun provideNutritionixOkHttpClient(): OkHttpClient {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
-        return OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(NutritionixAuthInterceptor())
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
-
-    // Интерцептор для Nutritionix авторизации
-    class NutritionixAuthInterceptor : Interceptor {
-        override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
-            val original = chain.request()
-            val request = original.newBuilder()
-                .header("x-app-id", NUTRITIONIX_APP_ID)
-                .header("x-app-key", NUTRITIONIX_APP_KEY)
-                .header("Content-Type", "application/json")
-                .method(original.method, original.body)
-                .build()
-            return chain.proceed(request)
-        }
-    }
+    // ТОЛЬКО ваш бэкенд URL - Nutritionix удалён
+    private const val YOUR_API_BASE_URL = "http://10.0.2.2:8000/"
 
     // ===== ВАШ БЭКЕНД API =====
     fun provideMyApiService(context: Context): ApiService {

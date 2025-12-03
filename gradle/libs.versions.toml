@@ -33,8 +33,6 @@ espresso-core = "3.5.1"
 # Новые версии для камеры и Nutritionix
 androidx-camera = "1.3.0"
 androidx-exifinterface = "1.3.6"
-glide = "4.15.1"
-commons-codec = "1.15"
 legacySupportV4 = "1.0.0"
 fragmentKtx = "1.8.9"
 
@@ -92,10 +90,6 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 
 # Для обработки изображений
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "androidx-exifinterface" }
-
-# Для Nutritionix (уникальные алиасы)
-glide-library = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
-commons-codec-library = { group = "commons-codec", name = "commons-codec", version.ref = "commons-codec" }
 
 # Для навигации
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
