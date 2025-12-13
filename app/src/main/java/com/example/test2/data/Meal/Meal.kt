@@ -12,5 +12,6 @@ data class Meal(
     val name: String,
     val calories: Int,
     val date: Date,
-    val productsIds: String
+    val productsIds: String,
+    val productsWeights: String = "" // Новое поле для весов
 )
