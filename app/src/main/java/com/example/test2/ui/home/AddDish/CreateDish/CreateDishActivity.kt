@@ -49,6 +49,7 @@ class CreateDishActivity : AppCompatActivity() {
     private var totalCarbs = 0
     private var userId = -1L
     private var allProducts = listOf<Product>()
+    private val REQUEST_CAMERA = 20
 
     data class SelectedProduct(
         val product: Product,
@@ -63,12 +64,6 @@ class CreateDishActivity : AppCompatActivity() {
     }
 
     // Для камеры
-    private val takePictureLauncher = registerForActivityResult(
-        ActivityResultContracts.TakePicturePreview()
-    ) { bitmap: Bitmap? ->
-        bitmap?.let { processCameraImage(it) }
-    }
-
     companion object {
         private const val TAG = "CreateDishActivity"
         private const val CAMERA_PERMISSION_REQUEST_CODE = 100
@@ -172,7 +167,14 @@ class CreateDishActivity : AppCompatActivity() {
 
     private fun openCamera() {
         if (checkCameraPermission()) {
-            takePictureLauncher.launch(null)
+            // Запускаем ВАШУ CameraActivity
+            try {
+                val intent = Intent(this, com.example.test2.utils.CameraActivity::class.java)
+                startActivityForResult(intent, REQUEST_CAMERA)
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка при открытии камеры: ${e.message}", e)
+                Toast.makeText(this, "Не удалось открыть камеру", Toast.LENGTH_SHORT).show()
+            }
         } else {
             requestCameraPermission()
         }
@@ -201,7 +203,13 @@ class CreateDishActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openCamera()
+
+                try {
+                    val intent = Intent(this, com.example.test2.utils.CameraActivity::class.java)
+                    startActivityForResult(intent, REQUEST_CAMERA)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Не удалось открыть камеру", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(
                     this,
@@ -211,6 +219,24 @@ class CreateDishActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                REQUEST_CAMERA -> {
+                    val uriString = data?.getStringExtra("photo_uri")
+                    if (uriString != null) {
+                        processSelectedImage(Uri.parse(uriString), "camera")
+                    } else {
+                        Toast.makeText(this, "Не удалось получить фото", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun processCameraImage(bitmap: Bitmap) {
         lifecycleScope.launch {
