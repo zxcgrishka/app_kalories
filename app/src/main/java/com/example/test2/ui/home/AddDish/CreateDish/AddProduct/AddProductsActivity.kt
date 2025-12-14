@@ -141,7 +141,7 @@ class AddProductsActivity : AppCompatActivity() {
         }
 
         binding.button2?.setOnClickListener {
-            saveCurrentProduct()
+            saveCurrentProduct() //лог1
         }
 
         // Кнопки для навигации между продуктами
@@ -748,10 +748,6 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun saveCurrentProduct() {
-        if (allDetections.isEmpty() || currentDetectionIndex >= allDetections.size) {
-            Toast.makeText(this, "Нет продуктов для сохранения", Toast.LENGTH_SHORT).show()
-            return
-        }
 
         val name = binding.edName?.text?.toString()?.trim() ?: ""
         val caloriesText = binding.edKalories?.text?.toString() ?: "0"
