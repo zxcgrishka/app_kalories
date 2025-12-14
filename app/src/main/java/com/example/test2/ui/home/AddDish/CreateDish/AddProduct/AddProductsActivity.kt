@@ -748,11 +748,6 @@ class AddProductsActivity : AppCompatActivity() {
     }
 
     private fun saveCurrentProduct() {
-        if (allDetections.isEmpty() || currentDetectionIndex >= allDetections.size) {
-            Toast.makeText(this, "Нет продуктов для сохранения", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         val name = binding.edName?.text?.toString()?.trim() ?: ""
         val caloriesText = binding.edKalories?.text?.toString() ?: "0"
         val proteinsText = binding.edProteins?.text?.toString() ?: "0"
@@ -774,43 +769,77 @@ class AddProductsActivity : AppCompatActivity() {
             return
         }
 
-        val product = Product(
-            id = null,
-            ProductName = name,
-            ProductCalories = calories,
-            ProductProteins = proteins,
-            ProductFats = fats,
-            ProductCarbohydrates = carbs
-        )
-
         // Сохраняем продукт в базу данных
         lifecycleScope.launch {
             try {
+                // ЕСТЬ ЛИ УЖЕ ТАКОЙ ПРОДУКТ В БАЗЕ
+                val allProducts = database.productDao().getAllProducts().first()
+                val productExists = allProducts.any {
+                    it.ProductName.trim().equals(name.trim(), ignoreCase = true)
+                }
+
+                if (productExists) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@AddProductsActivity,
+                            "Продукт '$name' уже есть в базе!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        Log.d(TAG, "Продукт '$name' не сохранён - уже существует в базе")
+
+                        // Продолжаем навигацию для нейросети или очищаем для ручного ввода
+                        if (allDetections.isNotEmpty()) {
+                            processedImages.add(currentDetectionIndex)  // Помечаем как обработанный
+                            showNextProduct()  // Показываем следующий продукт
+                        } else {
+                            clearFields()
+                        }
+                    }
+                    return@launch  // не сохраняем дубликат
+                }
+                // конец проверки
+
+                // если продукта нет - создаём новый
+                val product = Product(
+                    id = null,
+                    ProductName = name,
+                    ProductCalories = calories,
+                    ProductProteins = proteins,
+                    ProductFats = fats,
+                    ProductCarbohydrates = carbs
+                )
+
                 database.productDao().insert(product)
 
                 runOnUiThread {
-                    // Помечаем продукт как обработанный
-                    processedImages.add(currentDetectionIndex)
+                    // Помечаем продукт как обработанный (для нейросети)
+                    if (allDetections.isNotEmpty()) {
+                        processedImages.add(currentDetectionIndex)
+                    }
 
                     Toast.makeText(
                         this@AddProductsActivity,
-                        "Продукт '$name' успешно сохранен!",
+                        "Продукт '$name' сохранён!",
                         Toast.LENGTH_SHORT
                     ).show()
                     Log.d(TAG, "Продукт сохранен: $product")
 
-                    // Показываем следующий продукт
-                    showNextProduct()
+                    // Логика навигации
+                    if (allDetections.isNotEmpty()) {
+                        showNextProduct()
 
-                    // Показываем статистику
-                    val savedCount = processedImages.size
-                    val totalCount = allDetections.size
-                    if (savedCount == totalCount) {
-                        Toast.makeText(
-                            this@AddProductsActivity,
-                            "Все продукты сохранены!",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        // Показываем статистику
+                        val savedCount = processedImages.size
+                        val totalCount = allDetections.size
+                        if (savedCount == totalCount) {
+                            Toast.makeText(
+                                this@AddProductsActivity,
+                                "Все продукты обработаны!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } else {
+                        clearFields()  // Очищаем поля для ручного ввода
                     }
                 }
 
