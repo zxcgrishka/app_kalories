@@ -18,7 +18,7 @@ import com.example.test2.data.DailyMealDao
 
 @Database(
     entities = [User::class, Product::class, Meal::class, DailyMeal::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -39,6 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "app_database"
                 )
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

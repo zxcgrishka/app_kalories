@@ -141,7 +141,7 @@ class AddProductsActivity : AppCompatActivity() {
         }
 
         binding.button2?.setOnClickListener {
-            saveCurrentProduct()
+            saveCurrentProduct() //лог1
         }
 
         // Кнопки для навигации между продуктами
