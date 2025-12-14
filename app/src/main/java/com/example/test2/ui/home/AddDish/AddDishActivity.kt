@@ -66,9 +66,31 @@ class AddDishActivity : AppCompatActivity() {
                     totalCalories = totalCalories,
                     mealIds = selectedMeals.map { it.id }.joinToString(",")
                 )
+
                 lifecycleScope.launch {
+                    // ЗАПИСЬ 1: Сохраняем DailyMeal
                     localRepository.insertDailyMeal(dailyMeal)
                     Log.d("AddDishActivity", "DailyMeal saved: $totalCalories кал")
+
+                    // ЗАПИСЬ 2: Добавляем/обновляем записи в таблице Meal
+                    // Для каждого выбранного блюда создаем/обновляем запись в Meal
+                    selectedMeals.forEach { selectedMeal ->
+                        // Создаем новую запись Meal на основе выбранного блюда
+                        val newMeal = Meal(
+                            id = 0, // 0 для автоинкремента (Room заменит)
+                            userId = userId,
+                            name = selectedMeal.name,
+                            calories = selectedMeal.calories,
+                            date = Date(), // текущая дата как дата приема пищи
+                            productsIds = selectedMeal.productsIds,
+                            productsWeights = selectedMeal.productsWeights
+                        )
+
+                        // Используем существующий метод insertMeal из DAO
+                        localRepository.insertMeal(newMeal)
+                        Log.d("AddDishActivity", "Meal saved to database: ${newMeal.name}")
+                    }
+
                     setResult(RESULT_OK)
                     finish()
                 }
@@ -76,6 +98,7 @@ class AddDishActivity : AppCompatActivity() {
                 Log.w("AddDishActivity", "No meals selected")
             }
         }
+
         binding.btnCreateDish.setOnClickListener {
             Log.d("AddDishActivity", "btnCreateDish clicked — redirecting to CreateDish")
             val intent = Intent(this, CreateDishActivity::class.java)
