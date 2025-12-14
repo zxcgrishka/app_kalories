@@ -10,6 +10,38 @@
     android:padding="16dp"
     tools:context=".AddDishActivity">
 
+    <LinearLayout
+        android:id="@+id/headerContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageViewCalendar"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="14dp"
+            android:elevation="8dp"
+            android:src="@drawable/icon2_2" />
+
+        <TextView
+            android:id="@+id/textViewTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/khula_bold"
+            android:gravity="center"
+            android:text="Создать блюдо"
+            android:textColor="@color/c5"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/btnReady"
         android:layout_width="299dp"
@@ -51,31 +83,6 @@
         app:strokeColor="@color/c5"
         app:strokeWidth="1dp" />
 
-    <TextView
-        android:id="@+id/textView8"
-        android:layout_width="205dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="88dp"
-        android:layout_marginTop="60dp"
-        android:fontFamily="@font/khula_bold"
-        android:gravity="center"
-        android:text="Добавить прием пищи"
-        android:textAlignment="textStart"
-        android:textColor="@color/c5"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/rvMeals"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginEnd="14dp"
-        android:src="@drawable/icon2_2"
-        app:layout_constraintEnd_toStartOf="@+id/textView8"
-        app:layout_constraintTop_toTopOf="@+id/textView8" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMeals"
         android:layout_width="332dp"
@@ -83,10 +90,9 @@
         android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView8"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/headerContainer"
+        app:layout_constraintVertical_bias="0.1"
         tools:listitem="@layout/item_meal" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
