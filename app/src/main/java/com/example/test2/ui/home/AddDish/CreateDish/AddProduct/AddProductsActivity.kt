@@ -7,12 +7,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.lifecycleScope
 import com.example.test2.data.AppDatabase
 import com.example.test2.databinding.ActivityAddProductsBinding
+import com.example.test2.ml.Detection
 import com.example.test2.ml.YoloDetector
 import com.example.test2.utils.CameraActivity
 import kotlinx.coroutines.flow.first
@@ -27,8 +30,9 @@ class AddProductsActivity : AppCompatActivity() {
     private lateinit var originalBitmap: Bitmap
     private lateinit var database: AppDatabase
 
-    private var detectedFood: String? = null
-    private var detectionConfidence: Float = 0f
+    private var allDetections: List<Detection> = emptyList()
+    private var currentDetectionIndex: Int = 0
+    private var processedImages: MutableSet<Int> = mutableSetOf()
 
     private val REQUEST_PICK_IMAGE = 10
     private val REQUEST_CAMERA = 20
@@ -37,68 +41,60 @@ class AddProductsActivity : AppCompatActivity() {
         private const val TAG = "AddProductsActivity"
     }
 
-    // База данных продуктов с БЖУ (на 100г)
+    // База данных продуктов с БЖУ (на 100г) для всех 43 классов
     private val foodNutritionDatabase = mapOf(
-        "banana" to FoodNutrition(
-            calories = 89,
-            proteins = 1,
-            fats = 0,
-            carbs = 23
-        ),
-        "apple" to FoodNutrition(
-            calories = 52,
-            proteins = 0,
-            fats = 0,
-            carbs = 14
-        ),
-        "sandwich" to FoodNutrition(
-            calories = 250,
-            proteins = 10,
-            fats = 8,
-            carbs = 35
-        ),
-        "orange" to FoodNutrition(
-            calories = 47,
-            proteins = 1,
-            fats = 0,
-            carbs = 12
-        ),
-        "broccoli" to FoodNutrition(
-            calories = 34,
-            proteins = 3,
-            fats = 0,
-            carbs = 7
-        ),
-        "carrot" to FoodNutrition(
-            calories = 41,
-            proteins = 1,
-            fats = 0,
-            carbs = 10
-        ),
-        "hot dog" to FoodNutrition(
-            calories = 290,
-            proteins = 10,
-            fats = 26,
-            carbs = 4
-        ),
-        "pizza" to FoodNutrition(
-            calories = 266,
-            proteins = 11,
-            fats = 10,
-            carbs = 33
-        ),
-        "donut" to FoodNutrition(
-            calories = 452,
-            proteins = 5,
-            fats = 25,
-            carbs = 51
-        ),
-        "cake" to FoodNutrition(
-            calories = 371,
-            proteins = 4,
-            fats = 16,
-            carbs = 53
-        )
+        // Фрукты
+        "Яблоко" to FoodNutrition(52, 0, 0, 14),
+        "Банан" to FoodNutrition(89, 1, 0, 23),
+        "Апельсин" to FoodNutrition(47, 1, 0, 12),
+        "Виноград" to FoodNutrition(69, 1, 0, 18),
+        "Грейпфрут" to FoodNutrition(42, 1, 0, 11),
+        "Лимон" to FoodNutrition(29, 1, 0, 9),
+        "Персик" to FoodNutrition(39, 1, 0, 10),
+        "Груша" to FoodNutrition(57, 0, 0, 15),
+        "Клубника" to FoodNutrition(32, 1, 0, 8),
+        "Арбуз" to FoodNutrition(30, 1, 0, 8),
+
+        // Овощи
+        "Болгарский перец" to FoodNutrition(31, 1, 0, 6),
+        "Брокколи" to FoodNutrition(34, 3, 0, 7),
+        "Морковь" to FoodNutrition(41, 1, 0, 10),
+        "Огурец" to FoodNutrition(15, 1, 0, 3),
+        "Помидор" to FoodNutrition(18, 1, 0, 4),
+        "Картофель" to FoodNutrition(77, 2, 0, 17),
+        "Салат" to FoodNutrition(15, 1, 0, 3),
+
+        // Мучное и выпечка
+        "Хлеб" to FoodNutrition(265, 9, 3, 49),
+        "Торт" to FoodNutrition(371, 4, 16, 53),
+        "Печенье" to FoodNutrition(500, 6, 24, 65),
+        "Круассан" to FoodNutrition(406, 8, 21, 45),
+        "Пончик" to FoodNutrition(452, 5, 25, 51),
+        "Маффин" to FoodNutrition(425, 6, 20, 56),
+        "Блин" to FoodNutrition(227, 6, 9, 32),
+        "Вафля" to FoodNutrition(291, 6, 14, 38),
+
+        // Основные блюда и продукты
+        "Сыр" to FoodNutrition(402, 25, 33, 1),
+        "Пицца" to FoodNutrition(266, 11, 10, 33),
+        "Гамбургер" to FoodNutrition(295, 17, 14, 24),
+        "Картофель фри" to FoodNutrition(312, 3, 15, 41),
+        "Паста" to FoodNutrition(131, 5, 1, 25),
+        "Суши" to FoodNutrition(150, 5, 1, 30),
+        "Яйцо" to FoodNutrition(155, 13, 11, 1),
+
+        // Русская/славянская кухня
+        "Борщ" to FoodNutrition(54, 2, 2, 8),
+        "Гречка" to FoodNutrition(92, 3, 1, 20),
+        "Котлета" to FoodNutrition(230, 15, 16, 8),
+        "Пельмени" to FoodNutrition(248, 12, 10, 29),
+        "Макароны" to FoodNutrition(131, 5, 1, 25),
+        "Пюре картофельное" to FoodNutrition(83, 2, 3, 15),
+        "Молочная каша" to FoodNutrition(93, 3, 3, 15),
+        "Окрошка" to FoodNutrition(64, 3, 2, 9),
+        "Рис" to FoodNutrition(130, 3, 0, 28),
+        "Колбаса" to FoodNutrition(336, 16, 29, 1),
+        "Суп" to FoodNutrition(60, 3, 2, 8)
     )
 
     data class FoodNutrition(
@@ -124,7 +120,7 @@ class AddProductsActivity : AppCompatActivity() {
             Toast.makeText(this, "Ошибка загрузки модели нейросети", Toast.LENGTH_LONG).show()
         }
 
-        // Используем безопасные вызовы для nullable полей
+        // Настройка кнопок
         binding.btnOpenGallery?.setOnClickListener {
             Log.d(TAG, "Кнопка галереи нажата")
             pickImageFromGallery()
@@ -145,7 +141,37 @@ class AddProductsActivity : AppCompatActivity() {
         }
 
         binding.button2?.setOnClickListener {
-            saveProduct()
+            saveCurrentProduct()
+        }
+
+        // Кнопки для навигации между продуктами
+        binding.btnPrevProduct?.setOnClickListener {
+            showPreviousProduct()
+        }
+
+        binding.btnNextProduct?.setOnClickListener {
+            showNextProduct()
+        }
+
+        // Кнопка для выбора продукта из списка
+        binding.btnSelectProduct?.setOnClickListener {
+            showProductSelectionDialog()
+        }
+
+        // Инициализация UI
+        updateNavigationButtons()
+        binding.tvList?.text = "Выберите изображение с едой"
+
+        // Скрываем кнопки навигации до загрузки изображения
+        binding.btnPrevProduct?.visibility = View.GONE
+        binding.btnNextProduct?.visibility = View.GONE
+        binding.btnSelectProduct?.visibility = View.GONE
+
+        val foodName = intent.getStringExtra("food_name")
+        if (!foodName.isNullOrBlank()) {
+            binding.edName?.setText(foodName)
+            // Автоматически ищем в базе данных
+            searchFoodInDatabase(foodName)
         }
     }
 
@@ -213,31 +239,21 @@ class AddProductsActivity : AppCompatActivity() {
         try {
             var bitmap: Bitmap? = null
 
-            // Простой способ загрузки
             contentResolver.openInputStream(uri)?.use { inputStream ->
-                // Сначала получаем размеры изображения
                 val options = BitmapFactory.Options().apply {
                     inJustDecodeBounds = true
                 }
 
-                // Декодируем только для получения размеров
                 BitmapFactory.decodeStream(inputStream, null, options)
-
-                // Возвращаемся в начало потока
                 inputStream.close()
 
-                // Открываем поток заново
                 val newInputStream = contentResolver.openInputStream(uri)
                 newInputStream?.use { newStream ->
-                    // Рассчитываем коэффициент масштабирования
                     val scale = calculateInSampleSize(options, 1024, 1024)
-
                     val scaledOptions = BitmapFactory.Options().apply {
                         inSampleSize = scale
                         inPreferredConfig = Bitmap.Config.ARGB_8888
                     }
-
-                    // Декодируем с масштабированием
                     bitmap = BitmapFactory.decodeStream(newStream, null, scaledOptions)
                 }
             }
@@ -247,13 +263,8 @@ class AddProductsActivity : AppCompatActivity() {
                 return
             }
 
-            // Поворачиваем если нужно
             bitmap = rotateImageIfRequired(bitmap!!, uri)
-
-            // Сохраняем оригинал
             originalBitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
-
-            // Обрабатываем
             processImageWithDetection(originalBitmap)
 
         } catch (e: Exception) {
@@ -314,133 +325,344 @@ class AddProductsActivity : AppCompatActivity() {
 
     private fun processImageWithDetection(bitmap: Bitmap) {
         Log.d(TAG, "Начало обработки изображения, размер: ${bitmap.width}x${bitmap.height}")
-        binding.tvList?.text = "Обработка изображения..."
+        binding.tvList?.text = "Обработка изображения нейросетью..."
 
-        try {
-            if (!::detector.isInitialized) {
-                Log.e(TAG, "Детектор не инициализирован")
-                Toast.makeText(this, "Нейросеть не готова", Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            // Показываем превью изображения
-            showImagePreview(bitmap)
-
-            // Детекция объектов (в фоновом потоке)
-            Thread {
-                try {
-                    val detections = detector.detectFoodOnly(bitmap)
-                    Log.d(TAG, "Найдено объектов: ${detections.size}")
-
+        Thread {
+            try {
+                if (!::detector.isInitialized) {
                     runOnUiThread {
-                        if (detections.isEmpty()) {
-                            binding.tvList?.text = "Еда не обнаружена\nПопробуйте другое изображение"
-                            Toast.makeText(
-                                this,
-                                "Не удалось распознать еду. Убедитесь, что еда хорошо видна на фото",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            return@runOnUiThread
-                        }
-
-                        // Рисуем bounding boxes на изображении
-                        val annotatedBitmap = drawDetections(bitmap, detections)
-                        showImagePreview(annotatedBitmap)
-
-                        // Берем самый уверенный результат
-                        val bestDetection = detections.maxByOrNull { it.confidence }
-                        detectedFood = bestDetection?.label
-                        detectionConfidence = bestDetection?.confidence ?: 0f
-
-                        // Автозаполнение полей
-                        detectedFood?.let { foodName ->
-                            binding.edName?.setText(foodName)
-
-                            // Получаем калории и БЖУ из нашей базы данных
-                            fillNutritionFields(foodName)
-
-                            val confidencePercent = (detectionConfidence * 100).toInt()
-                            Toast.makeText(
-                                this,
-                                "Обнаружено: $foodName (${confidencePercent}% уверенности)",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            Log.d(TAG, "Обнаружено: $foodName с уверенностью ${confidencePercent}%")
-                        }
+                        Toast.makeText(this, "Нейросеть не готова", Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Ошибка детекции: ${e.message}", e)
-                    runOnUiThread {
+                    return@Thread
+                }
+
+                val detections = detector.detectFoodOnly(bitmap)
+                Log.d(TAG, "Найдено объектов: ${detections.size}")
+
+                runOnUiThread {
+                    if (detections.isEmpty()) {
+                        binding.tvList?.text = "Еда не обнаружена\nПопробуйте другое изображение"
                         Toast.makeText(
                             this,
-                            "Ошибка обработки изображения нейросетью: ${e.message}",
+                            "Не удалось распознать еду. Убедитесь, что еда хорошо видна на фото",
                             Toast.LENGTH_LONG
                         ).show()
+                        return@runOnUiThread
                     }
-                }
-            }.start()
 
-        } catch (e: Exception) {
-            Log.e(TAG, "Ошибка в processImageWithDetection: ${e.message}", e)
-            Toast.makeText(this, "Ошибка обработки: ${e.message}", Toast.LENGTH_SHORT).show()
+                    // Сохраняем все детекции
+                    allDetections = detections
+                    currentDetectionIndex = 0
+                    processedImages.clear()
+
+                    // Показываем статистику
+                    val uniqueFoods = detections.map { it.label }.distinct()
+                    val statsText = "Найдено ${detections.size} объектов еды:\n" +
+                            uniqueFoods.joinToString(", ")
+
+                    Toast.makeText(
+                        this,
+                        "Найдено ${detections.size} продуктов!",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    // Показываем первый продукт
+                    showCurrentProduct()
+
+                    // Показываем кнопки навигации
+                    binding.btnPrevProduct?.visibility = View.VISIBLE
+                    binding.btnNextProduct?.visibility = View.VISIBLE
+                    binding.btnSelectProduct?.visibility = View.VISIBLE
+
+                    updateNavigationButtons()
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка детекции: ${e.message}", e)
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        "Ошибка обработки изображения нейросетью: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    binding.tvList?.text = "Ошибка обработки\nПопробуйте снова"
+                }
+            }
+        }.start()
+    }
+
+    private fun showCurrentProduct() {
+        if (allDetections.isEmpty() || currentDetectionIndex >= allDetections.size) {
+            return
+        }
+
+        val detection = allDetections[currentDetectionIndex]
+
+        // Рисуем bounding box только для текущего продукта
+        val annotatedBitmap = drawSingleDetection(originalBitmap, detection, currentDetectionIndex)
+        showImagePreview(annotatedBitmap)
+
+        // Заполняем поля данными текущего продукта
+        fillNutritionFields(detection.label)
+
+        // Показываем информацию о текущем продукте
+        val confidencePercent = (detection.confidence * 100).toInt()
+        val counterText = "Продукт ${currentDetectionIndex + 1} из ${allDetections.size}"
+        val infoText = "$counterText\n${detection.label} (${confidencePercent}%)\n" +
+                "Размер: ${detection.box.width().toInt()}x${detection.box.height().toInt()}"
+
+        binding.tvProductInfo?.text = infoText
+
+        // Проверяем, был ли этот продукт уже сохранен
+        if (processedImages.contains(currentDetectionIndex)) {
+            binding.button2?.text = "Уже сохранен"
+            binding.button2?.isEnabled = false
+        } else {
+            binding.button2?.text = "Сохранить продукт"
+            binding.button2?.isEnabled = true
+        }
+
+        updateNavigationButtons()
+    }
+
+    private fun drawSingleDetection(bitmap: Bitmap, detection: Detection, index: Int): Bitmap {
+        val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(mutableBitmap)
+
+        // Масштабируем толщину линии и текст
+        val scale = bitmap.width / 1000f
+
+        // Цвет для текущего продукта (зеленый), для других (серый)
+        val isCurrent = true // Только текущий продукт подсвечивается
+        val boxColor = if (isCurrent) Color.GREEN else Color.GRAY
+        val textColor = if (isCurrent) Color.RED else Color.DKGRAY
+
+        // Рисуем bounding box
+        val boxPaint = Paint().apply {
+            color = boxColor
+            style = Paint.Style.STROKE
+            strokeWidth = max(3f, 4f * scale)
+            if (!isCurrent) {
+                alpha = 100 // Прозрачность для неактивных
+            }
+        }
+
+        canvas.drawRect(detection.box, boxPaint)
+
+        // Текст с меткой и номером
+        val label = "${index + 1}. ${detection.label} ${(detection.confidence * 100).toInt()}%"
+        val textPaint = Paint().apply {
+            color = textColor
+            textSize = max(24f, 32f * scale)
+            style = Paint.Style.FILL
+            isAntiAlias = true
+            if (!isCurrent) {
+                alpha = 150
+            }
+        }
+
+        val textBgPaint = Paint().apply {
+            color = if (isCurrent) Color.argb(150, 0, 0, 0) else Color.argb(100, 100, 100, 100)
+            style = Paint.Style.FILL
+        }
+
+        val textWidth = textPaint.measureText(label)
+        val textHeight = textPaint.textSize
+
+        // Фон для текста
+        val textBgRect = RectF(
+            detection.box.left,
+            detection.box.top - textHeight - 5,
+            detection.box.left + textWidth + 10,
+            detection.box.top - 5
+        )
+        canvas.drawRect(textBgRect, textBgPaint)
+
+        // Сам текст
+        canvas.drawText(
+            label,
+            detection.box.left + 5,
+            detection.box.top - 10,
+            textPaint
+        )
+
+        return mutableBitmap
+    }
+
+    private fun showPreviousProduct() {
+        if (allDetections.isEmpty()) return
+
+        currentDetectionIndex--
+        if (currentDetectionIndex < 0) {
+            currentDetectionIndex = allDetections.size - 1
+        }
+
+        showCurrentProduct()
+    }
+
+    private fun showNextProduct() {
+        if (allDetections.isEmpty()) return
+
+        currentDetectionIndex++
+        if (currentDetectionIndex >= allDetections.size) {
+            currentDetectionIndex = 0
+        }
+
+        showCurrentProduct()
+    }
+
+    private fun showProductSelectionDialog() {
+        if (allDetections.isEmpty()) {
+            Toast.makeText(this, "Сначала загрузите изображение", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val productNames = allDetections.mapIndexed { index, detection ->
+            "${index + 1}. ${detection.label} (${(detection.confidence * 100).toInt()}%)"
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Выберите продукт")
+            .setItems(productNames.toTypedArray()) { _, which ->
+                currentDetectionIndex = which
+                showCurrentProduct()
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
+    private fun updateNavigationButtons() {
+        if (allDetections.isEmpty()) {
+            binding.btnPrevProduct?.isEnabled = false
+            binding.btnNextProduct?.isEnabled = false
+            binding.btnSelectProduct?.isEnabled = false
+        } else {
+            binding.btnPrevProduct?.isEnabled = true
+            binding.btnNextProduct?.isEnabled = true
+            binding.btnSelectProduct?.isEnabled = true
+
+            // Обновляем текст кнопок
+            binding.btnPrevProduct?.text = "← Предыдущий"
+            binding.btnNextProduct?.text = "Следующий →"
         }
     }
 
     private fun fillNutritionFields(foodName: String) {
-        // Приводим название к нижнему регистру для поиска
-        val lowerFoodName = foodName.lowercase()
+        Log.d(TAG, "Заполнение полей для продукта: $foodName")
 
-        // Ищем продукт в базе данных (с учетом возможных вариаций названий)
-        val nutrition = findNutritionInDatabase(lowerFoodName)
+        // Устанавливаем название продукта
+        binding.edName?.setText(foodName)
+
+        // Ищем питательные значения
+        val nutrition = findNutritionInDatabase(foodName)
 
         if (nutrition != null) {
+            // Нашли в локальной базе
             binding.edKalories?.setText(nutrition.calories.toString())
             binding.edProteins?.setText(nutrition.proteins.toString())
             binding.edFats?.setText(nutrition.fats.toString())
             binding.edCarbohydrates?.setText(nutrition.carbs.toString())
 
-            Log.d(TAG, "Заполнены данные для $foodName: ${nutrition.calories} ккал, " +
-                    "Б: ${nutrition.proteins}, Ж: ${nutrition.fats}, У: ${nutrition.carbs}")
+            Log.d(TAG, "Заполнены данные из локальной базы для $foodName")
         } else {
-            // Если продукт не найден в базе, используем базовые значения из YoloDetector
-            val calories = detector.getCaloriesForFood(foodName)
-            binding.edKalories?.setText(calories.toString())
-            binding.edProteins?.setText("0")
-            binding.edFats?.setText("0")
-            binding.edCarbohydrates?.setText("0")
+            // Не нашли в локальной базе, используем детектор
+            try {
+                if (::detector.isInitialized) {
+                    val nutritionFromDetector = detector.getNutritionForFood(foodName)
+                    binding.edKalories?.setText(nutritionFromDetector.calories.toString())
+                    binding.edProteins?.setText(nutritionFromDetector.proteins.toString())
+                    binding.edFats?.setText(nutritionFromDetector.fats.toString())
+                    binding.edCarbohydrates?.setText(nutritionFromDetector.carbs.toString())
 
-            Log.d(TAG, "Продукт $foodName не найден в базе, использованы базовые значения")
+                    Log.d(TAG, "Заполнены данные из детектора для $foodName")
+                } else {
+                    setDefaultNutritionValues()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка получения данных из детектора: ${e.message}", e)
+                setDefaultNutritionValues()
+            }
         }
     }
 
+    private fun setDefaultNutritionValues() {
+        binding.edKalories?.setText("150")
+        binding.edProteins?.setText("5")
+        binding.edFats?.setText("5")
+        binding.edCarbohydrates?.setText("15")
+    }
+
     private fun findNutritionInDatabase(foodName: String): FoodNutrition? {
+        val lowerFoodName = foodName.lowercase()
+
+        // 1. Прямое совпадение по русским названиям
+        foodNutritionDatabase.forEach { (key, value) ->
+            if (key.equals(foodName, ignoreCase = true)) {
+                return value
+            }
+        }
+
+        // 2. Поиск по частичному совпадению
         return when {
-            foodName.contains("banana") -> foodNutritionDatabase["banana"]
-            foodName.contains("apple") -> foodNutritionDatabase["apple"]
-            foodName.contains("sandwich") -> foodNutritionDatabase["sandwich"]
-            foodName.contains("orange") -> foodNutritionDatabase["orange"]
-            foodName.contains("broccoli") -> foodNutritionDatabase["broccoli"]
-            foodName.contains("carrot") -> foodNutritionDatabase["carrot"]
-            foodName.contains("hot dog") || foodName.contains("hotdog") -> foodNutritionDatabase["hot dog"]
-            foodName.contains("pizza") -> foodNutritionDatabase["pizza"]
-            foodName.contains("donut") || foodName.contains("doughnut") -> foodNutritionDatabase["donut"]
-            foodName.contains("cake") -> foodNutritionDatabase["cake"]
+            lowerFoodName.contains("яблок") -> foodNutritionDatabase["Яблоко"]
+            lowerFoodName.contains("банан") -> foodNutritionDatabase["Банан"]
+            lowerFoodName.contains("апельсин") -> foodNutritionDatabase["Апельсин"]
+            lowerFoodName.contains("виноград") -> foodNutritionDatabase["Виноград"]
+            lowerFoodName.contains("грейпфрут") -> foodNutritionDatabase["Грейпфрут"]
+            lowerFoodName.contains("лимон") -> foodNutritionDatabase["Лимон"]
+            lowerFoodName.contains("персик") -> foodNutritionDatabase["Персик"]
+            lowerFoodName.contains("груш") -> foodNutritionDatabase["Груша"]
+            lowerFoodName.contains("клубник") -> foodNutritionDatabase["Клубника"]
+            lowerFoodName.contains("арбуз") -> foodNutritionDatabase["Арбуз"]
+
+            lowerFoodName.contains("перец") && lowerFoodName.contains("болгар") -> foodNutritionDatabase["Болгарский перец"]
+            lowerFoodName.contains("броккол") -> foodNutritionDatabase["Брокколи"]
+            lowerFoodName.contains("морков") -> foodNutritionDatabase["Морковь"]
+            lowerFoodName.contains("огурец") -> foodNutritionDatabase["Огурец"]
+            lowerFoodName.contains("помидор") -> foodNutritionDatabase["Помидор"]
+            lowerFoodName.contains("картофель") && !lowerFoodName.contains("фри") && !lowerFoodName.contains("пюре") -> foodNutritionDatabase["Картофель"]
+            lowerFoodName.contains("салат") -> foodNutritionDatabase["Салат"]
+
+            lowerFoodName.contains("хлеб") -> foodNutritionDatabase["Хлеб"]
+            lowerFoodName.contains("торт") -> foodNutritionDatabase["Торт"]
+            lowerFoodName.contains("печень") -> foodNutritionDatabase["Печенье"]
+            lowerFoodName.contains("круассан") -> foodNutritionDatabase["Круассан"]
+            lowerFoodName.contains("пончик") || lowerFoodName.contains("донат") -> foodNutritionDatabase["Пончик"]
+            lowerFoodName.contains("маффин") -> foodNutritionDatabase["Маффин"]
+            lowerFoodName.contains("блин") -> foodNutritionDatabase["Блин"]
+            lowerFoodName.contains("вафл") -> foodNutritionDatabase["Вафля"]
+
+            lowerFoodName.contains("сыр") -> foodNutritionDatabase["Сыр"]
+            lowerFoodName.contains("пицц") -> foodNutritionDatabase["Пицца"]
+            lowerFoodName.contains("гамбургер") || lowerFoodName.contains("бургер") -> foodNutritionDatabase["Гамбургер"]
+            (lowerFoodName.contains("картош") || lowerFoodName.contains("картофель")) && lowerFoodName.contains("фри") -> foodNutritionDatabase["Картофель фри"]
+            lowerFoodName.contains("паст") || lowerFoodName.contains("макарон") -> foodNutritionDatabase["Паста"]
+            lowerFoodName.contains("суши") -> foodNutritionDatabase["Суши"]
+            lowerFoodName.contains("яйц") -> foodNutritionDatabase["Яйцо"]
+
+            lowerFoodName.contains("борщ") -> foodNutritionDatabase["Борщ"]
+            lowerFoodName.contains("греч") -> foodNutritionDatabase["Гречка"]
+            lowerFoodName.contains("котлет") -> foodNutritionDatabase["Котлета"]
+            lowerFoodName.contains("пельмен") -> foodNutritionDatabase["Пельмени"]
+            lowerFoodName.contains("пюре") && lowerFoodName.contains("картош") -> foodNutritionDatabase["Пюре картофельное"]
+            lowerFoodName.contains("молоч") && lowerFoodName.contains("каш") -> foodNutritionDatabase["Молочная каша"]
+            lowerFoodName.contains("окрошк") -> foodNutritionDatabase["Окрошка"]
+            lowerFoodName.contains("рис") -> foodNutritionDatabase["Рис"]
+            lowerFoodName.contains("колбас") -> foodNutritionDatabase["Колбаса"]
+            lowerFoodName.contains("суп") && !lowerFoodName.contains("борщ") -> foodNutritionDatabase["Суп"]
+
             else -> null
         }
     }
 
     private fun showImagePreview(bitmap: Bitmap) {
-        // Проверяем размер TextView перед масштабированием
         val tvList = binding.tvList ?: return
 
         if (tvList.width <= 0 || tvList.height <= 0) {
-            // Если размеры еще не известны, используем небольшие размеры
             val previewBitmap = Bitmap.createScaledBitmap(bitmap, 300, 300, true)
             tvList.text = ""
             tvList.setBackgroundBitmap(previewBitmap)
         } else {
-            // Масштабируем для превью
             val previewBitmap = Bitmap.createScaledBitmap(
                 bitmap,
                 tvList.width,
@@ -453,62 +675,6 @@ class AddProductsActivity : AppCompatActivity() {
         }
     }
 
-    private fun drawDetections(bitmap: Bitmap, detections: List<com.example.test2.ml.Detection>): Bitmap {
-        val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(mutableBitmap)
-
-        // Масштабируем толщину линии и текст
-        val scale = bitmap.width / 1000f
-
-        // Создаем Paint объекты
-        val boxPaint = Paint().apply {
-            color = Color.GREEN
-            style = Paint.Style.STROKE
-            strokeWidth = max(3f, 4f * scale)
-        }
-
-        val textPaint = Paint().apply {
-            color = Color.RED
-            textSize = max(24f, 32f * scale)
-            style = Paint.Style.FILL
-            isAntiAlias = true
-        }
-
-        val textBgPaint = Paint().apply {
-            color = Color.argb(150, 0, 0, 0)
-            style = Paint.Style.FILL
-        }
-
-        for (detection in detections) {
-            // Рисуем bounding box
-            canvas.drawRect(detection.box, boxPaint)
-
-            // Текст с меткой и уверенностью
-            val label = "${detection.label} ${(detection.confidence * 100).toInt()}%"
-            val textWidth = textPaint.measureText(label)
-            val textHeight = textPaint.textSize
-
-            // Фон для текста
-            val textBgRect = RectF(
-                detection.box.left,
-                detection.box.top - textHeight - 5,
-                detection.box.left + textWidth + 10,
-                detection.box.top - 5
-            )
-            canvas.drawRect(textBgRect, textBgPaint)
-
-            // Сам текст
-            canvas.drawText(
-                label,
-                detection.box.left + 5,
-                detection.box.top - 10,
-                textPaint
-            )
-        }
-
-        return mutableBitmap
-    }
-
     private fun searchFoodInDatabase(query: String) {
         Log.d(TAG, "Поиск продукта: '$query'")
 
@@ -517,46 +683,32 @@ class AddProductsActivity : AppCompatActivity() {
             return
         }
 
-        // Сначала проверяем локальную базу данных БЖУ
-        val lowerQuery = query.lowercase()
-        val nutrition = findNutritionInDatabase(lowerQuery)
+        val nutrition = findNutritionInDatabase(query)
 
         if (nutrition != null) {
-            // Нашли в локальной базе БЖУ
             binding.edName?.setText(query)
             binding.edKalories?.setText(nutrition.calories.toString())
             binding.edProteins?.setText(nutrition.proteins.toString())
             binding.edFats?.setText(nutrition.fats.toString())
             binding.edCarbohydrates?.setText(nutrition.carbs.toString())
 
-            Toast.makeText(
-                this,
-                "Найден продукт: $query",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(this, "Найден продукт: $query", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Если не нашли в локальной базе, ищем в Room базе данных
         lifecycleScope.launch {
             try {
-                // Получаем все продукты из базы данных Room
                 val productsFlow = database.productDao().getAllProducts()
                 val products = try {
-                    productsFlow.first() // Получаем первый элемент из Flow
+                    productsFlow.first()
                 } catch (e: Exception) {
                     Log.e(TAG, "Ошибка получения продуктов: ${e.message}")
                     emptyList()
                 }
 
-                Log.d(TAG, "Всего продуктов в базе: ${products.size}")
-
-                // Простой поиск по названию
                 val filteredProducts = products.filter { product ->
                     product.ProductName.contains(query, ignoreCase = true)
                 }
-
-                Log.d(TAG, "Найдено продуктов: ${filteredProducts.size}")
 
                 if (filteredProducts.isEmpty()) {
                     runOnUiThread {
@@ -567,7 +719,6 @@ class AddProductsActivity : AppCompatActivity() {
                         ).show()
                     }
                 } else {
-                    // Берем первый найденный продукт
                     val product = filteredProducts.first()
                     runOnUiThread {
                         binding.edName?.setText(product.ProductName)
@@ -596,7 +747,12 @@ class AddProductsActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveProduct() {
+    private fun saveCurrentProduct() {
+        if (allDetections.isEmpty() || currentDetectionIndex >= allDetections.size) {
+            Toast.makeText(this, "Нет продуктов для сохранения", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val name = binding.edName?.text?.toString()?.trim() ?: ""
         val caloriesText = binding.edKalories?.text?.toString() ?: "0"
         val proteinsText = binding.edProteins?.text?.toString() ?: "0"
@@ -627,12 +783,15 @@ class AddProductsActivity : AppCompatActivity() {
             ProductCarbohydrates = carbs
         )
 
-        // Сохраняем продукт в базу данных через coroutine
+        // Сохраняем продукт в базу данных
         lifecycleScope.launch {
             try {
                 database.productDao().insert(product)
 
                 runOnUiThread {
+                    // Помечаем продукт как обработанный
+                    processedImages.add(currentDetectionIndex)
+
                     Toast.makeText(
                         this@AddProductsActivity,
                         "Продукт '$name' успешно сохранен!",
@@ -640,8 +799,19 @@ class AddProductsActivity : AppCompatActivity() {
                     ).show()
                     Log.d(TAG, "Продукт сохранен: $product")
 
-                    // Очищаем поля после сохранения
-                    clearFields()
+                    // Показываем следующий продукт
+                    showNextProduct()
+
+                    // Показываем статистику
+                    val savedCount = processedImages.size
+                    val totalCount = allDetections.size
+                    if (savedCount == totalCount) {
+                        Toast.makeText(
+                            this@AddProductsActivity,
+                            "Все продукты сохранены!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
 
             } catch (e: Exception) {
@@ -663,14 +833,12 @@ class AddProductsActivity : AppCompatActivity() {
         binding.edProteins?.setText("")
         binding.edFats?.setText("")
         binding.edCarbohydrates?.setText("")
-        binding.tvList?.text = "Продукт сохранен"
+        binding.tvList?.text = "Продукт сохранен\nВыберите новое изображение"
         binding.tvList?.setBackgroundBitmap(null)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Не закрываем базу данных здесь, так как AppDatabase использует singleton
-        // и автоматически управляет соединением
     }
 }
 

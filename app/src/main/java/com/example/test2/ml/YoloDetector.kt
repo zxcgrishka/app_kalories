@@ -15,23 +15,134 @@ data class Detection(
     val box: RectF
 )
 
+data class FoodNutrition(
+    val calories: Int,
+    val proteins: Int,
+    val fats: Int,
+    val carbs: Int
+)
+
 class YoloDetector(context: Context) {
 
-    // ==== ПАРАМЕТРЫ МОДЕЛИ ====
-    private val INPUT_SIZE = 640          // 640x640
-    private val NUM_CLASSES = 80          // COCO
-    private val OUTPUT_CHANNELS = 84      // 4 (bbox) + 80 (classes)
-    private val NUM_BOXES = 8400          // 8400 боксов
+    // ==== ПАРАМЕТРЫ ДЛЯ ВАШЕЙ МОДЕЛИ С 43 КЛАССАМИ ====
+    private val INPUT_SIZE = 640            // 640x640
+    private val NUM_CLASSES = 43            // 43 класса как у вас
+    private val OUTPUT_CHANNELS = 4 + NUM_CLASSES // 4 (bbox) + 43 (классы) = 47
+    private val NUM_BOXES = 8400           // 8400 предсказаний
 
     private val interpreter: Interpreter
     private val labels: List<String>
 
-    // Классы, которые считаем «едой»
-    private val FOOD_CLASSES = setOf(
-        "apple","banana","orange","broccoli","carrot",
-        "hot dog","pizza","donut","cake","sandwich",
-        "bowl","cup","fork","knife","spoon","bottle","wine glass",
-        "dining table","chair"
+    // Карта калорий для всех 43 классов (калории на 100г)
+    private val foodCaloriesMap = mapOf(
+        // Фрукты
+        "Яблоко" to 52,
+        "Банан" to 89,
+        "Апельсин" to 47,
+        "Виноград" to 69,
+        "Грейпфрут" to 42,
+        "Лимон" to 29,
+        "Персик" to 39,
+        "Груша" to 57,
+        "Клубника" to 32,
+        "Арбуз" to 30,
+
+        // Овощи
+        "Болгарский перец" to 31,
+        "Брокколи" to 34,
+        "Морковь" to 41,
+        "Огурец" to 15,
+        "Помидор" to 18,
+        "Картофель" to 77,
+        "Салат" to 15,
+
+        // Мучное и выпечка
+        "Хлеб" to 265,
+        "Торт" to 371,
+        "Печенье" to 500,
+        "Круассан" to 406,
+        "Пончик" to 452,
+        "Маффин" to 425,
+        "Блин" to 227,
+        "Вафля" to 291,
+
+        // Основные блюда
+        "Сыр" to 402,
+        "Пицца" to 266,
+        "Гамбургер" to 295,
+        "Картофель фри" to 312,
+        "Паста" to 131,
+        "Суши" to 150,
+        "Борщ" to 54,
+        "Суп" to 60,
+
+        // Прочее
+        "Яйцо" to 155,
+        "Пельмени" to 248,
+        "Котлета" to 230,
+        "Колбаса" to 336,
+        "Молочная каша" to 93,
+        "Гречка" to 92,
+        "Рис" to 130,
+        "Макароны" to 131,
+        "Пюре картофельное" to 83,
+        "Окрошка" to 64
+    )
+
+    // Карта БЖУ для всех 43 классов
+    private val foodNutritionMap = mapOf(
+        // Фрукты
+        "Яблоко" to FoodNutrition(52, 0, 0, 14),
+        "Банан" to FoodNutrition(89, 1, 0, 23),
+        "Апельсин" to FoodNutrition(47, 1, 0, 12),
+        "Виноград" to FoodNutrition(69, 1, 0, 18),
+        "Грейпфрут" to FoodNutrition(42, 1, 0, 11),
+        "Лимон" to FoodNutrition(29, 1, 0, 9),
+        "Персик" to FoodNutrition(39, 1, 0, 10),
+        "Груша" to FoodNutrition(57, 0, 0, 15),
+        "Клубника" to FoodNutrition(32, 1, 0, 8),
+        "Арбуз" to FoodNutrition(30, 1, 0, 8),
+
+        // Овощи
+        "Болгарский перец" to FoodNutrition(31, 1, 0, 6),
+        "Брокколи" to FoodNutrition(34, 3, 0, 7),
+        "Морковь" to FoodNutrition(41, 1, 0, 10),
+        "Огурец" to FoodNutrition(15, 1, 0, 3),
+        "Помидор" to FoodNutrition(18, 1, 0, 4),
+        "Картофель" to FoodNutrition(77, 2, 0, 17),
+        "Салат" to FoodNutrition(15, 1, 0, 3),
+
+        // Мучное и выпечка
+        "Хлеб" to FoodNutrition(265, 9, 3, 49),
+        "Торт" to FoodNutrition(371, 4, 16, 53),
+        "Печенье" to FoodNutrition(500, 6, 24, 65),
+        "Круассан" to FoodNutrition(406, 8, 21, 45),
+        "Пончик" to FoodNutrition(452, 5, 25, 51),
+        "Маффин" to FoodNutrition(425, 6, 20, 56),
+        "Блин" to FoodNutrition(227, 6, 9, 32),
+        "Вафля" to FoodNutrition(291, 6, 14, 38),
+
+        // Основные блюда
+        "Сыр" to FoodNutrition(402, 25, 33, 1),
+        "Пицца" to FoodNutrition(266, 11, 10, 33),
+        "Гамбургер" to FoodNutrition(295, 17, 14, 24),
+        "Картофель фри" to FoodNutrition(312, 3, 15, 41),
+        "Паста" to FoodNutrition(131, 5, 1, 25),
+        "Суши" to FoodNutrition(150, 5, 1, 30),
+        "Борщ" to FoodNutrition(54, 2, 2, 8),
+        "Суп" to FoodNutrition(60, 3, 2, 8),
+
+        // Прочее
+        "Яйцо" to FoodNutrition(155, 13, 11, 1),
+        "Пельмени" to FoodNutrition(248, 12, 10, 29),
+        "Котлета" to FoodNutrition(230, 15, 16, 8),
+        "Колбаса" to FoodNutrition(336, 16, 29, 1),
+        "Молочная каша" to FoodNutrition(93, 3, 3, 15),
+        "Гречка" to FoodNutrition(92, 3, 1, 20),
+        "Рис" to FoodNutrition(130, 3, 0, 28),
+        "Макароны" to FoodNutrition(131, 5, 1, 25),
+        "Пюре картофельное" to FoodNutrition(83, 2, 3, 15),
+        "Окрошка" to FoodNutrition(64, 3, 2, 9)
     )
 
     companion object {
@@ -39,7 +150,7 @@ class YoloDetector(context: Context) {
     }
 
     init {
-        Log.d(TAG, "Инициализация YoloDetector...")
+        Log.d(TAG, "Инициализация YoloDetector для 43 классов...")
 
         // ===== ЗАГРУЗКА МОДЕЛИ =====
         try {
@@ -50,6 +161,11 @@ class YoloDetector(context: Context) {
                 setNumThreads(4)
             }
             interpreter = Interpreter(model, options)
+
+            // Логируем форму выхода для контроля
+            val outShape = interpreter.getOutputTensor(0).shape()
+            Log.d(TAG, "Форма выхода модели: ${outShape.contentToString()}")
+
             Log.d(TAG, "Интерпретатор создан успешно")
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка загрузки модели: ${e.message}", e)
@@ -61,8 +177,15 @@ class YoloDetector(context: Context) {
             labels = FileUtil.loadLabels(context, "labels.txt")
             Log.d(TAG, "Загружено ${labels.size} меток")
 
-            val foodLabels = labels.filter { isFood(it) }
-            Log.d(TAG, "Метки еды в labels.txt: ${foodLabels.joinToString()}")
+            // Проверяем, что метки соответствуют 43 классам
+            if (labels.size != NUM_CLASSES) {
+                Log.w(TAG, "Ожидалось $NUM_CLASSES классов, но загружено ${labels.size}")
+            }
+
+            // Логируем все метки для отладки
+            labels.forEachIndexed { index, label ->
+                Log.d(TAG, "Класс $index: $label")
+            }
 
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка загрузки labels.txt: ${e.message}", e)
@@ -102,7 +225,7 @@ class YoloDetector(context: Context) {
 
         Log.d(TAG, "Входные данные подготовлены")
 
-        // 3) Выходной массив: [1, 84, 8400]
+        // 3) Выходной массив: [1, 47, 8400] (4 + 43 класса)
         val output = Array(1) {
             Array(OUTPUT_CHANNELS) {
                 FloatArray(NUM_BOXES)
@@ -119,7 +242,7 @@ class YoloDetector(context: Context) {
             throw e
         }
 
-        // 5) Постпроцессинг YOLOv8
+        // 5) Постпроцессинг для YOLOv8 с 43 классами
         val rawDetections = processYoloV8Output(output, bitmap)
         Log.d(TAG, "Всего сырых детекций: ${rawDetections.size}")
 
@@ -131,12 +254,13 @@ class YoloDetector(context: Context) {
     }
 
     /**
-     * Парсинг выхода YOLOv8.
-     *
-     * ВАЖНО:
-     * ДЛЯ YOLOv8 НЕТ ОТДЕЛЬНОГО OBJECTNESS-КАНАЛА.
-     * Формат: [x, y, w, h, class0, class1, ..., class79]
-     * Т.е. всего 4 + NUM_CLASSES = 84 каналов.
+     * Парсинг выхода YOLOv8 для модели с 43 классами:
+     * Формат: [1, 47, 8400] где 47 = 4 (bbox) + 43 (классы)
+     * 0: cx (center x)
+     * 1: cy (center y)
+     * 2: w (width)
+     * 3: h (height)
+     * 4-46: вероятности 43 классов
      */
     private fun processYoloV8Output(
         output: Array<Array<FloatArray>>,
@@ -145,53 +269,44 @@ class YoloDetector(context: Context) {
 
         val detections = mutableListOf<Detection>()
         var objectsFound = 0
-        var foodFound = 0
 
         val scoreThreshold = 0.25f   // порог уверенности
-        val step = 1                 // какое количество боксов пропускать (1 = все)
 
-        Log.d(TAG, "Обработка вывода YOLOv8: channels=$OUTPUT_CHANNELS, boxes=$NUM_BOXES")
+        Log.d(TAG, "Обработка вывода YOLOv8 с ${NUM_CLASSES} классами")
 
-        // идём по всем 8400 боксам
-        for (i in 0 until NUM_BOXES step step) {
+        for (i in 0 until NUM_BOXES) {
             try {
-                val cx = output[0][0][i]   // center x (в норм. координатах)
+                val cx = output[0][0][i]   // center x
                 val cy = output[0][1][i]   // center y
                 val w  = output[0][2][i]   // width
                 val h  = output[0][3][i]   // height
 
-                // ===== ВАЖНО: НЕТ objectness =====
-                // Каналы 4..83 — это просто классы.
-
+                // Ищем класс с максимальной вероятностью
                 var bestClass = -1
                 var bestScore = 0f
 
                 for (c in 0 until NUM_CLASSES) {
-                    val classProb = output[0][4 + c][i]
+                    val classProb = output[0][4 + c][i]  // каналы 4-46
                     if (classProb > bestScore) {
                         bestScore = classProb
                         bestClass = c
                     }
                 }
 
-                if (bestClass == -1) continue
-
-                val finalScore = bestScore  // никакого obj * class
-
-                if (finalScore < scoreThreshold) continue
+                if (bestClass == -1 || bestScore < scoreThreshold) continue
                 objectsFound++
 
                 val label = labels.getOrNull(bestClass) ?: "class_$bestClass"
+                val finalScore = bestScore
 
-                // Для дебага логируем сильные боксы
                 if (finalScore > 0.5f) {
                     Log.d(
                         TAG,
-                        "Box $i: '$label' (class $bestClass) score=${"%.2f".format(finalScore)}"
+                        "Обнаружен: '$label' (класс $bestClass) уверенность=${"%.2f".format(finalScore)}"
                     )
                 }
 
-                // Преобразуем нормализованные координаты в пиксели
+                // Конвертируем нормализованные координаты в пиксели
                 val x1 = (cx - w / 2f) * bitmap.width
                 val y1 = (cy - h / 2f) * bitmap.height
                 val x2 = (cx + w / 2f) * bitmap.width
@@ -204,47 +319,26 @@ class YoloDetector(context: Context) {
 
                 if (right <= left || bottom <= top) continue
 
-                val det = Detection(
-                    label = label,
-                    confidence = finalScore,
-                    box = RectF(left, top, right, bottom)
+                detections.add(
+                    Detection(
+                        label = label,
+                        confidence = finalScore,
+                        box = RectF(left, top, right, bottom)
+                    )
                 )
-                detections.add(det)
-
-                if (isFood(label)) {
-                    foodFound++
-                }
 
             } catch (e: Exception) {
                 Log.e(TAG, "Ошибка при обработке бокса $i: ${e.message}")
             }
         }
 
-        Log.d(TAG, "Анализ завершён: всего объектов: $objectsFound, из них еды (по меткам): $foodFound")
+        Log.d(TAG, "Анализ завершён: всего объектов: $objectsFound")
         return detections
     }
 
     // ========================================================================
     //                                УТИЛИТЫ
     // ========================================================================
-
-    private fun isFood(label: String): Boolean {
-        val lower = label.lowercase().trim()
-
-        // точное совпадение
-        if (FOOD_CLASSES.any { it.lowercase() == lower }) return true
-
-        // частичное совпадение
-        if (FOOD_CLASSES.any { food ->
-                lower.contains(food.lowercase()) || food.lowercase().contains(lower)
-            }) return true
-
-        // по ключевым словам
-        val keywords = listOf("fruit","food","meal","eat","drink","snack","vegetable")
-        if (keywords.any { lower.contains(it) }) return true
-
-        return false
-    }
 
     private fun applyNMS(detections: List<Detection>, iouThreshold: Float): List<Detection> {
         if (detections.isEmpty()) return emptyList()
@@ -292,45 +386,54 @@ class YoloDetector(context: Context) {
     fun detectFoodOnly(bitmap: Bitmap): List<Detection> {
         Log.d(TAG, "Запуск detectFoodOnly")
         val all = detect(bitmap)
-        val onlyFood = all.filter { isFood(it.label) }
-        Log.d(TAG, "Обнаружено всего: ${all.size}, из них еды: ${onlyFood.size}")
-        if (onlyFood.isEmpty() && all.isNotEmpty()) {
-            Log.d(TAG, "Найденные не-едовые объекты:")
-            all.forEach {
-                Log.d(TAG, "  ${it.label} (${(it.confidence * 100).toInt()}%)")
-            }
+
+        // Все 43 класса - это еда, так что возвращаем всё
+        Log.d(TAG, "Обнаружено объектов: ${all.size}")
+        all.forEach {
+            Log.d(TAG, "  ${it.label} (${(it.confidence * 100).toInt()}%)")
         }
-        return onlyFood
+
+        return all
     }
 
     fun getCaloriesForFood(foodName: String, portionSize: Float = 1.0f): Int {
-        val caloriesPer100g = when (foodName.lowercase()) {
-            "apple" -> 52
-            "banana" -> 89
-            "orange" -> 47
-            "pizza" -> 266
-            "sandwich" -> 250
-            "hot dog", "hotdog" -> 290
-            "donut" -> 452
-            "cake" -> 371
-            "broccoli" -> 34
-            "carrot" -> 41
-            "bottle" -> 0
-            "cup" -> 0
-            "bowl" -> 0
-            "fork", "knife", "spoon" -> 0
-            "wine glass" -> 120
-            else -> {
-                Log.d(TAG, "Неизвестный продукт для калорий: $foodName, берём 100 ккал по умолчанию")
-                100
+        // Ищем точное совпадение
+        val caloriesPer100g = foodCaloriesMap[foodName]
+            ?: foodCaloriesMap.entries.firstOrNull {
+                foodName.contains(it.key, ignoreCase = true)
+            }?.value
+            ?: run {
+                Log.d(TAG, "Неизвестный продукт для калорий: $foodName, берём 150 ккал по умолчанию")
+                150  // среднее значение по умолчанию
             }
-        }
 
         val estimatedWeight = portionSize * 100f
         val calories = (caloriesPer100g * estimatedWeight / 100f).toInt()
         Log.d(TAG, "Калории для '$foodName': $calories (${caloriesPer100g} ккал/100г, порция=$portionSize)")
 
         return calories
+    }
+
+    fun getNutritionForFood(foodName: String): FoodNutrition {
+        // Ищем точное совпадение
+        val nutrition = foodNutritionMap[foodName]
+            ?: foodNutritionMap.entries.firstOrNull {
+                foodName.contains(it.key, ignoreCase = true)
+            }?.value
+            ?: run {
+                Log.d(TAG, "Неизвестный продукт для БЖУ: $foodName, берём средние значения")
+                FoodNutrition(
+                    calories = getCaloriesForFood(foodName),
+                    proteins = 5,  // среднее значение
+                    fats = 5,      // среднее значение
+                    carbs = 15     // среднее значение
+                )
+            }
+
+        Log.d(TAG, "БЖУ для '$foodName': ${nutrition.calories} ккал, " +
+                "Б: ${nutrition.proteins}, Ж: ${nutrition.fats}, У: ${nutrition.carbs}")
+
+        return nutrition
     }
 
     fun estimatePortionSize(box: RectF, imageWidth: Int, imageHeight: Int): Float {
