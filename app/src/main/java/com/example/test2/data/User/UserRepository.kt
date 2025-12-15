@@ -15,6 +15,7 @@ import com.example.test2.utils.TokenManager
 import kotlinx.coroutines.flow.Flow
 import org.mindrot.jbcrypt.BCrypt
 import retrofit2.HttpException
+import java.util.Date
 
 class UserRepository(
     private val database: AppDatabase,
@@ -107,6 +108,12 @@ class UserRepository(
     }
     suspend fun clearDailyMealsByUser(userId: Long) {
         DailyMealDao.clearDailyMealsByUser(userId)
+    }
+
+    suspend fun getDailyMealsByPeriod(userId: Long, startDate: Date, endDate: Date): List<DailyMeal> {
+        val startTimestamp = startDate.time
+        val endTimestamp = endDate.time
+        return database.dailyMealDao().getDailyMealsByPeriod(userId, startTimestamp, endTimestamp)
     }
 
 
