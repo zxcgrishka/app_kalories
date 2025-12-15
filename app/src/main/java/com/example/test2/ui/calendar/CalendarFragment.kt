@@ -15,37 +15,30 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.example.test2.R
 import com.example.test2.databinding.FragmentCalendarBinding
 import com.example.test2.data.AppDatabase
-import com.example.test2.data.Meal
+import com.example.test2.data.DailyMeal.DailyMeal
 import com.example.test2.data.User.UserRepository
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.DailyMealViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
 
-
-
 class CalendarFragment : Fragment() {
 
     private var _binding: FragmentCalendarBinding? = null
     private val binding get() = _binding!!
 
-    // Цвета для градиента столбцов (сверху вниз)
     private val colorBarTop = Color.parseColor("#E3F3FC")
     private val colorBarBottom = Color.parseColor("#C6FADC")
-
-    // Цвета для дизайна
     private val colorZeroLine = Color.parseColor("#C6FADC")
     private val colorGridLine = Color.parseColor("#E3F3FC")
     private val colorTriangle = Color.parseColor("#C6FADC")
     private val colorGridText = Color.parseColor("#FFFFFF")
 
-    // Настройки
     private val strokeWidthZeroLine = 20f
     private val strokeWidthGrid = 2f
     private val triangleHeight = 36f
@@ -70,19 +63,15 @@ class CalendarFragment : Fragment() {
     private val dataPoints = LinkedHashMap<String, Float>()
     private var userId = -1L
 
-    // Для хранения выбранного периода
-    private var selectedStartDate: Date? = null
-    private var selectedEndDate: Date? = null
+    private lateinit var selectedStartDate: Date
+    private lateinit var selectedEndDate: Date
 
-    // Используем существующий UserRepository
     private lateinit var userRepository: UserRepository
     private lateinit var dailyMealViewModel: DailyMealViewModel
 
-    // Для выбора периода
     private val fullDateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
     private val displayDateFormat = SimpleDateFormat("dd.MM", Locale.getDefault())
 
-    // Цвет из ресурсов - инициализируем в onCreateView
     private var colorC5: Int = 0
 
     override fun onCreateView(
@@ -91,20 +80,15 @@ class CalendarFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCalendarBinding.inflate(inflater, container, false)
-
-        // Инициализируем цвет из ресурсов
         colorC5 = ContextCompat.getColor(requireContext(), R.color.c5)
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Получаем ID пользователя
         userId = getUserIdFromPrefs()
 
-        // Инициализируем репозиторий
         val database = AppDatabase.getDatabase(requireContext())
         userRepository = UserRepository(
             database,
@@ -112,7 +96,6 @@ class CalendarFragment : Fragment() {
             requireContext()
         )
 
-        // Создаем ViewModel
         dailyMealViewModel = ViewModelProvider(
             requireActivity() as ViewModelStoreOwner,
             DailyMealViewModelFactory(userRepository)
@@ -124,21 +107,16 @@ class CalendarFragment : Fragment() {
         binding.graphContainer.removeAllViews()
         binding.graphContainer.addView(graphView)
 
-        // Устанавливаем обработчики для выбора дат
         setupDatePickers()
-
-        // По умолчанию загружаем данные за последние 7 дней
         setDefaultPeriod()
         loadDataFromDatabase()
     }
 
     private fun setupDatePickers() {
-        // Обработчик для начала периода
         binding.etStartDate.setOnClickListener {
             showDatePickerDialog(true)
         }
 
-        // Обработчик для конца периода
         binding.etEndDate.setOnClickListener {
             showDatePickerDialog(false)
         }
@@ -146,7 +124,6 @@ class CalendarFragment : Fragment() {
 
     private fun showDatePickerDialog(isStartDate: Boolean) {
         val calendar = Calendar.getInstance()
-        val currentDate = calendar.time
 
         DatePickerDialogFragment { year, month, day ->
             calendar.set(year, month, day)
@@ -160,9 +137,7 @@ class CalendarFragment : Fragment() {
                 binding.etEndDate.setText(fullDateFormat.format(selectedDate))
             }
 
-            // Автоматически обновляем график при выборе даты
             loadDataFromDatabase()
-
         }.show(parentFragmentManager, "datePicker")
     }
 
@@ -170,7 +145,7 @@ class CalendarFragment : Fragment() {
         val calendar = Calendar.getInstance()
         selectedEndDate = calendar.time
 
-        calendar.add(Calendar.DAY_OF_YEAR, -6) // 7 дней назад (включая сегодня)
+        calendar.add(Calendar.DAY_OF_YEAR, -6)
         selectedStartDate = calendar.time
 
         binding.etStartDate.setText(fullDateFormat.format(selectedStartDate))
@@ -180,35 +155,40 @@ class CalendarFragment : Fragment() {
     private fun loadDataFromDatabase() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // Используем выбранные даты или значения по умолчанию
-                val start = selectedStartDate ?: run {
-                    val cal = Calendar.getInstance()
-                    cal.add(Calendar.DAY_OF_YEAR, -6)
-                    cal.time
-                }
+                // Устанавливаем startDate на начало дня
+                val startCalendar = Calendar.getInstance()
+                startCalendar.time = selectedStartDate
+                startCalendar.set(Calendar.HOUR_OF_DAY, 0)
+                startCalendar.set(Calendar.MINUTE, 0)
+                startCalendar.set(Calendar.SECOND, 0)
+                startCalendar.set(Calendar.MILLISECOND, 0)
+                val startDateBeginningOfDay = startCalendar.time
 
-                val end = selectedEndDate ?: Calendar.getInstance().time
+                // Устанавливаем endDate на конец дня
+                val endCalendar = Calendar.getInstance()
+                endCalendar.time = selectedEndDate
+                endCalendar.set(Calendar.HOUR_OF_DAY, 23)
+                endCalendar.set(Calendar.MINUTE, 59)
+                endCalendar.set(Calendar.SECOND, 59)
+                endCalendar.set(Calendar.MILLISECOND, 999)
+                val endDateEndOfDay = endCalendar.time
 
-                // Получаем ВСЕ приемы пищи для пользователя через репозиторий
-                val allMeals = getAllMealsForUser(userId)
+                val dailyMeals = userRepository.getDailyMealsByPeriod(
+                    userId,
+                    startDateBeginningOfDay,
+                    endDateEndOfDay
+                )
 
-                // Фильтруем по выбранному периоду
-                val filteredMeals = allMeals.filter { meal ->
-                    meal.date.time in start.time..end.time
-                }
+                val groupedData = groupDailyMealsByDate(dailyMeals)
+                val processedData = processDataForDisplay(
+                    groupedData,
+                    selectedStartDate,
+                    selectedEndDate
+                )
 
-                // Группируем по дате и суммируем калории
-                val groupedData = groupAndSumCaloriesByDate(filteredMeals)
-
-                // Обрабатываем данные для отображения
-                val processedData = processDataForDisplay(groupedData, start, end)
-
-                // Очищаем старые данные
                 dataPoints.clear()
 
-                // Добавляем новые данные
                 withContext(Dispatchers.Main) {
-                    // Добавляем только данные, где есть калории (value > 0)
                     processedData.forEach { (date, calories) ->
                         if (calories > 0) {
                             addDataPoint(date, calories.toFloat())
@@ -220,36 +200,20 @@ class CalendarFragment : Fragment() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    dataPoints.clear()
+                    graphView.invalidate()
+                }
             }
         }
     }
 
-    // НОВЫЙ МЕТОД: Получаем все приемы пищи для пользователя
-    private suspend fun getAllMealsForUser(userId: Long): List<Meal> {
-        return try {
-            // Получаем DAO из базы данных
-            val database = AppDatabase.getDatabase(requireContext())
-            val mealDao = database.mealDao()
-
-            // Используем Flow из DAO и берем первое значение
-            val mealsFlow = mealDao.getMealsByUser(userId)
-            mealsFlow.first() // Получаем первое значение из Flow
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // В случае ошибки возвращаем пустой список
-            emptyList()
-        }
-    }
-
-    private fun groupAndSumCaloriesByDate(meals: List<Meal>): Map<String, Int> {
+    private fun groupDailyMealsByDate(dailyMeals: List<DailyMeal>): Map<String, Int> {
         val result = mutableMapOf<String, Int>()
 
-        meals.forEach { meal ->
-            // Форматируем дату в "dd.MM"
-            val dateKey = displayDateFormat.format(meal.date)
-
-            // Суммируем калории для этой даты
-            result[dateKey] = (result[dateKey] ?: 0) + meal.calories
+        dailyMeals.forEach { dailyMeal ->
+            val dateKey = displayDateFormat.format(dailyMeal.date)
+            result[dateKey] = (result[dateKey] ?: 0) + dailyMeal.totalCalories
         }
 
         return result
@@ -262,19 +226,15 @@ class CalendarFragment : Fragment() {
     ): Map<String, Int> {
         if (groupedData.isEmpty()) return emptyMap()
 
-        // Получаем список дат с данными, отсортированных по дате
         val datesWithData = groupedData.entries
             .filter { it.value > 0 }
             .sortedBy { parseDateString(it.key) }
 
-        // Рассчитываем количество дней с данными
         val daysWithDataCount = datesWithData.size
 
         return if (daysWithDataCount <= maxColumns) {
-            // Если дней с данными <= 7, показываем все дни с данными
             datesWithData.associate { it.key to it.value }
         } else {
-            // Если дней с данными > 7, группируем их в интервалы
             groupDataIntoIntervals(datesWithData)
         }
     }
@@ -288,7 +248,6 @@ class CalendarFragment : Fragment() {
         val intervalCount = maxColumns
         val entriesPerInterval = totalEntries.toFloat() / intervalCount
 
-        // Разбиваем записи с данными на интервалы
         for (i in 0 until intervalCount) {
             val startIndex = (i * entriesPerInterval).toInt()
             val endIndex = minOf(((i + 1) * entriesPerInterval).toInt() - 1, totalEntries - 1)
@@ -297,16 +256,13 @@ class CalendarFragment : Fragment() {
 
             val intervalEntries = sortedEntries.subList(startIndex, endIndex + 1)
 
-            // Рассчитываем среднее значение для интервала
             val sum = intervalEntries.sumOf { it.value }
             val avgCalories = if (intervalEntries.isNotEmpty()) sum / intervalEntries.size else 0
 
-            // Находим дату, значение которой ближе всего к среднему
             val closestDateEntry = intervalEntries.minByOrNull {
                 abs(it.value - avgCalories)
             }
 
-            // Используем дату из записи
             if (closestDateEntry != null && avgCalories > 0) {
                 result[closestDateEntry.key] = avgCalories
             }
@@ -427,11 +383,8 @@ class CalendarFragment : Fragment() {
         }
 
         private fun displaySelectedPeriod(canvas: Canvas, width: Float) {
-            val startDate = selectedStartDate ?: return
-            val endDate = selectedEndDate ?: return
-
-            val startStr = fullDateFormat.format(startDate)
-            val endStr = fullDateFormat.format(endDate)
+            val startStr = fullDateFormat.format(selectedStartDate)
+            val endStr = fullDateFormat.format(selectedEndDate)
 
             canvas.drawText(
                 "$startStr - $endStr",

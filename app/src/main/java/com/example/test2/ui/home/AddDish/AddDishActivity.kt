@@ -60,39 +60,33 @@ class AddDishActivity : AppCompatActivity() {
 
         binding.btnReady.setOnClickListener {
             if (selectedMeals.isNotEmpty()) {
+                // Собираем ID выбранных блюд - только ID, не создаем новые объекты
+                val mealIds = selectedMeals.map { it.id }.joinToString(",")
+
                 val dailyMeal = DailyMeal(
+                    id = 0, // Автоинкремент
                     userId = userId,
                     date = Date(),
                     totalCalories = totalCalories,
-                    mealIds = selectedMeals.map { it.id }.joinToString(",")
+                    mealIds = mealIds
                 )
 
                 lifecycleScope.launch {
-                    // ЗАПИСЬ 1: Сохраняем DailyMeal
-                    localRepository.insertDailyMeal(dailyMeal)
-                    Log.d("AddDishActivity", "DailyMeal saved: $totalCalories кал")
+                    try {
+                        // ЗАПИСЬ: Сохраняем ТОЛЬКО DailyMeal
+                        localRepository.insertDailyMeal(dailyMeal)
+                        Log.d("AddDishActivity", "DailyMeal saved: $totalCalories кал, meals IDs: $mealIds")
 
-                    // ЗАПИСЬ 2: Добавляем/обновляем записи в таблице Meal
-                    // Для каждого выбранного блюда создаем/обновляем запись в Meal
-                    selectedMeals.forEach { selectedMeal ->
-                        // Создаем новую запись Meal на основе выбранного блюда
-                        val newMeal = Meal(
-                            id = 0, // 0 для автоинкремента (Room заменит)
-                            userId = userId,
-                            name = selectedMeal.name,
-                            calories = selectedMeal.calories,
-                            date = Date(), // текущая дата как дата приема пищи
-                            productsIds = selectedMeal.productsIds,
-                            productsWeights = selectedMeal.productsWeights
-                        )
+                        // ПРОВЕРКА: Показываем, что блюда НЕ добавляются заново
+                        selectedMeals.forEach { meal ->
+                            Log.d("AddDishActivity", "Using existing meal - ID: ${meal.id}, Name: ${meal.name}")
+                        }
 
-                        // Используем существующий метод insertMeal из DAO
-                        localRepository.insertMeal(newMeal)
-                        Log.d("AddDishActivity", "Meal saved to database: ${newMeal.name}")
+                        setResult(RESULT_OK)
+                        finish()
+                    } catch (e: Exception) {
+                        Log.e("AddDishActivity", "Error saving DailyMeal", e)
                     }
-
-                    setResult(RESULT_OK)
-                    finish()
                 }
             } else {
                 Log.w("AddDishActivity", "No meals selected")
@@ -122,10 +116,13 @@ class AddDishActivity : AppCompatActivity() {
             if (isSelected) {
                 selectedMeals.add(meal)
                 totalCalories += meal.calories
+                Log.d("AddDishActivity", "Meal selected - ID: ${meal.id}, Name: ${meal.name}, Total selected: ${selectedMeals.size}")
             } else {
                 selectedMeals.remove(meal)
                 totalCalories -= meal.calories
+                Log.d("AddDishActivity", "Meal deselected - ID: ${meal.id}, Name: ${meal.name}")
             }
+
         }
         binding.rvMeals.layoutManager = LinearLayoutManager(this)
         binding.rvMeals.adapter = adapter
@@ -134,8 +131,17 @@ class AddDishActivity : AppCompatActivity() {
     private fun loadMeals() {
         mealViewModel.loadMeals(userId)
         mealViewModel.meals.observe(this) { meals ->
+            // ПРОВЕРКА: Логируем загруженные блюда
+            Log.d("AddDishActivity", "Loading ${meals.size} meals from database")
+            meals.forEachIndexed { index, meal ->
+                Log.d("AddDishActivity", "Meal $index - ID: ${meal.id}, Name: ${meal.name}, Calories: ${meal.calories}")
+            }
+
             adapter.updateMeals(meals)
-            Log.d("AddDishActivity", "Loaded ${meals.size} meals")
+
+            // Сбрасываем выбранные блюда при загрузке
+            selectedMeals.clear()
+            totalCalories = 0
         }
     }
 

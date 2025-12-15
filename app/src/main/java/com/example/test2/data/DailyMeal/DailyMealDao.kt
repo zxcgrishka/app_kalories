@@ -9,11 +9,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DailyMealDao {
-    @Query("SELECT * FROM daily_meals WHERE userId = :userId AND date(date / 1000, 'unixepoch') = date('now') ORDER BY date DESC")  // Фильтр по сегодняшней дате
+    @Insert
+    suspend fun insertDailyMeal(dailyMeal: DailyMeal)
+
+    @Query("SELECT * FROM daily_meals WHERE userId = :userId AND date(date / 1000, 'unixepoch') = date('now') ORDER BY date DESC")
     fun getTodayDailyMealsByUser(userId: Long): Flow<List<DailyMeal>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDailyMeal(dailyMeal: DailyMeal)
+    @Query("SELECT * FROM daily_meals WHERE userId = :userId AND date >= :startTimestamp AND date <= :endTimestamp ORDER BY date ASC")
+    suspend fun getDailyMealsByPeriod(userId: Long, startTimestamp: Long, endTimestamp: Long): List<DailyMeal>
 
     @Query("DELETE FROM daily_meals WHERE userId = :userId")
     suspend fun clearDailyMealsByUser(userId: Long)
