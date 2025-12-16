@@ -8,4 +8,7 @@
     <string name="logout">Logout</string>
     <string name="calendar_fragment">Calendar Fragment</string>
     <string name="add_dish">add dish</string>
+    <string name="todo">TODO</string>
+    <string name="head">Создать блюдо</string>
+    <string name="Ready">Готово</string>
 </resources>

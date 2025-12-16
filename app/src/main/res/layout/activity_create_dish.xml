@@ -1,254 +1,245 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="@drawable/gradient_background">
 
-    <ImageView
-        android:id="@+id/imageView7"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginEnd="14dp"
-        android:elevation="8dp"
-        android:src="@drawable/icon2_2"
-        app:layout_constraintEnd_toStartOf="@+id/textView7"
-        app:layout_constraintTop_toTopOf="@+id/textView7" />
-
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="92dp"
-        android:layout_marginTop="56dp"
-        android:fontFamily="@font/khula_bold"
-        android:gravity="center"
-        android:text="Создать блюдо"
-        android:textColor="@color/c5"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/rvProducts"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Две кнопки нейросети в горизонтальном ряду -->
     <LinearLayout
-        android:id="@+id/neuralLayout"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rvProducts">
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
 
-        <!-- Кнопка нейросети из галереи -->
-        <Button
-            android:id="@+id/btnNeuralGallery"
-            android:layout_width="0dp"
+        <!-- Заголовок -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="20dp">
+
+            <ImageView
+                android:id="@+id/imageView7"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginEnd="14dp"
+                android:elevation="8dp"
+                android:src="@drawable/icon2_2" />
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/khula_bold"
+                android:text="Создать блюдо"
+                android:textColor="@color/c5"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Название блюда -->
+        <EditText
+            android:id="@+id/etDishName"
+            android:layout_width="match_parent"
             android:layout_height="58dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/gradient_button_green"
-            android:drawableStart="@android:drawable/ic_menu_gallery"
-            android:drawablePadding="4dp"
-            android:fontFamily="@font/khula_regular"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/khula_light"
+            android:hint="Название блюда..."
+            android:inputType="text"
+            android:textAlignment="center"
+            android:textColor="@color/c5"
+            android:textColorHint="@color/c5"
+            android:textSize="24sp" />
+
+        <!-- Калории -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tvCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/khula_bold"
+                android:text="Всего ККАЛ:"
+                android:textColor="@color/c5"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTotalCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/khula_bold"
+                android:text="0"
+                android:textColor="@color/c3"
+                android:textSize="34sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- БЖУ -->
+        <LinearLayout
+            android:id="@+id/nutritionLayout"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvTotalProteins"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Б: 0г"
+                android:textColor="#2196F3"
+                android:textSize="14sp"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tvTotalFats"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Ж: 0г"
+                android:textColor="#FF9800"
+                android:textSize="14sp"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tvTotalCarbs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="У: 0г"
+                android:textColor="#4CAF50"
+                android:textSize="14sp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Список продуктов -->
+
+        <!-- Кнопки нейросети -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvProducts"
+            android:layout_width="376dp"
+            android:layout_height="129dp"
+            android:layout_marginTop="60dp"
+            android:background="@drawable/gradient_button_green"
+            android:elevation="8dp"
+            android:padding="6dp"
+            tools:listitem="@layout/item_product" />
+
+        <LinearLayout
+            android:id="@+id/neuralLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnNeuralGallery"
+                android:layout_width="0dp"
+                android:layout_height="58dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/gradient_button_green"
+                android:drawableStart="@android:drawable/ic_menu_gallery"
+                android:drawablePadding="4dp"
+                android:fontFamily="@font/khula_regular"
+                android:gravity="center"
+                android:insetTop="4dp"
+                android:insetBottom="4dp"
+                android:text="Из галереи"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:backgroundTint="@null"
+                app:cornerRadius="18dp"
+                app:strokeColor="@color/c5"
+                app:strokeWidth="1dp" />
+
+            <Button
+                android:id="@+id/btnNeuralCamera"
+                android:layout_width="0dp"
+                android:layout_height="58dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/gradient_button_green"
+                android:drawableStart="@android:drawable/ic_menu_camera"
+                android:drawablePadding="4dp"
+                android:fontFamily="@font/khula_regular"
+                android:gravity="center"
+                android:insetTop="4dp"
+                android:insetBottom="4dp"
+                android:text="С камеры"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:backgroundTint="@null"
+                app:cornerRadius="18dp"
+                app:strokeColor="@color/c5"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
+
+        <!-- Кнопка добавления продукта -->
+        <Button
+            android:id="@+id/btnAddProduct"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/gradient_button_green"
+            android:fontFamily="@font/khula_regular"
             android:insetTop="4dp"
             android:insetBottom="4dp"
-            android:text="Из галереи"
+            android:text="новый продукт"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="20sp"
             app:backgroundTint="@null"
             app:cornerRadius="18dp"
             app:strokeColor="@color/c5"
             app:strokeWidth="1dp" />
 
-        <!-- Кнопка нейросети из камеры -->
+        <!-- Статус нейросети -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="@color/c5"
+            android:textSize="12sp" />
+
+        <!-- Кнопка "Готово" -->
         <Button
-            android:id="@+id/btnNeuralCamera"
-            android:layout_width="0dp"
-            android:layout_height="58dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:id="@+id/btnSaveDish"
+            android:layout_width="252dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
             android:background="@drawable/gradient_button_green"
-            android:drawableStart="@android:drawable/ic_menu_camera"
-            android:drawablePadding="4dp"
-            android:fontFamily="@font/khula_regular"
-            android:gravity="center"
-            android:insetTop="4dp"
-            android:insetBottom="4dp"
-            android:text="С камеры"
+            android:elevation="16dp"
+            android:fontFamily="@font/khula_bold"
+            android:insetTop="0dp"
+            android:text="Готово"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="24sp"
             app:backgroundTint="@null"
             app:cornerRadius="18dp"
             app:strokeColor="@color/c5"
             app:strokeWidth="1dp" />
+
     </LinearLayout>
-
-    <!-- Кнопка добавления продукта -->
-    <Button
-        android:id="@+id/btnAddProduct"
-        android:layout_width="296dp"
-        android:layout_height="58dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/gradient_button_green"
-        android:fontFamily="@font/khula_regular"
-        android:insetTop="4dp"
-        android:insetBottom="4dp"
-        android:text="новый продукт"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        app:backgroundTint="@null"
-        app:cornerRadius="18dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.477"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/neuralLayout"
-        app:strokeColor="@color/c5"
-        app:strokeWidth="1dp" />
-
-    <!-- Статус нейросети -->
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text=""
-        android:textColor="@color/c5"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnAddProduct" />
-
-    <Button
-        android:id="@+id/btnSaveDish"
-        android:layout_width="252dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/gradient_button_green"
-        android:elevation="8dp"
-        android:fontFamily="@font/khula_bold"
-        android:insetTop="0dp"
-        android:text="Готово"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        app:backgroundTint="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvStatus" />
-
-    <EditText
-        android:id="@+id/etDishName"
-        android:layout_width="298dp"
-        android:layout_height="58dp"
-        android:layout_marginTop="40dp"
-        android:fontFamily="@font/khula_light"
-        android:hint="Название блюда..."
-        android:inputType="text"
-        android:textAlignment="center"
-        android:textColor="@color/c5"
-        android:textColorHint="@color/c5"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.481"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView7" />
-
-    <TextView
-        android:id="@+id/tvCalories"
-        android:layout_width="132dp"
-        android:layout_height="25dp"
-        android:layout_marginStart="72dp"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/khula_bold"
-        android:text="Всего ККАЛ:"
-        android:textColor="@color/c5"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/etDishName"
-        app:layout_constraintTop_toBottomOf="@+id/etDishName" />
-
-    <TextView
-        android:id="@+id/tvTotalCalories"
-        android:layout_width="132dp"
-        android:layout_height="44dp"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/khula_bold"
-        android:text="0"
-        android:textColor="@color/c3"
-        android:textSize="34sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toEndOf="@+id/tvCalories"
-        app:layout_constraintTop_toBottomOf="@+id/etDishName" />
-
-    <!-- БЖУ блюда -->
-    <LinearLayout
-        android:id="@+id/nutritionLayout"
-        android:layout_width="280dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTotalCalories">
-
-        <TextView
-            android:id="@+id/tvTotalProteins"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Б: 0г"
-            android:textColor="#2196F3"
-            android:textSize="14sp"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tvTotalFats"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Ж: 0г"
-            android:textColor="#FF9800"
-            android:textSize="14sp"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/tvTotalCarbs"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="У: 0г"
-            android:textColor="#4CAF50"
-            android:textSize="14sp"
-            android:gravity="center" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvProducts"
-        android:layout_width="332dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="60dp"
-        android:background="@drawable/gradient_button_green"
-        android:elevation="8dp"
-        android:padding="6dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nutritionLayout"
-        tools:listitem="@layout/item_product" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

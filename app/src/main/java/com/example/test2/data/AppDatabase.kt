@@ -18,7 +18,7 @@ import com.example.test2.data.DailyMealDao
 
 @Database(
     entities = [User::class, Product::class, Meal::class, DailyMeal::class],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

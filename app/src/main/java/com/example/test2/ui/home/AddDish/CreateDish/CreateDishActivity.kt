@@ -126,6 +126,9 @@ class CreateDishActivity : AppCompatActivity() {
                         "Блюдо '$dishName' сохранено!",
                         Toast.LENGTH_SHORT
                     ).show()
+                    val intent = Intent(this@CreateDishActivity, AddDishActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+
                     setResult(Activity.RESULT_OK)
                     finish()
                 }
