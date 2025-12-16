@@ -32,8 +32,6 @@ import com.example.test2.ui.home.AddDish.CreateDish.AddProduct.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.util.Date
 
 class CreateDishActivity : AppCompatActivity() {
@@ -116,7 +114,7 @@ class CreateDishActivity : AppCompatActivity() {
                     name = dishName,
                     calories = totalCalories,
                     date = Date(),
-                    productsIds = productsIds,
+                    products_ids = productsIds,
                     productsWeights = weights
                 )
 

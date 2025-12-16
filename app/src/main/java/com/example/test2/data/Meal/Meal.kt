@@ -11,7 +11,12 @@ data class Meal(
     val userId: Long,
     val name: String,
     val calories: Int,
+    val proteins: Int = 0,
+    val fats: Int = 0,
+    val carbohydrates: Int = 0,
     val date: Date,
-    val productsIds: String,
-    val productsWeights: String = "" // Новое поле для весов
+    val products_ids: String,
+    val productsWeights: String = "",
+    val server_id: Long? = null,  // ← Новое поле: ID на сервере
+    val synced: Boolean = false   // ← Новое поле: синхронизировано
 )

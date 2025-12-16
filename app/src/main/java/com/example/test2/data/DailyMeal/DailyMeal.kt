@@ -11,5 +11,7 @@ data class DailyMeal (
     val userId: Long,
     val date: Date,
     val totalCalories: Int,
-    val mealIds: String
+    val meal_ids: String,
+    val server_id: Long? = null,  // ← Новое поле
+    val synced: Boolean = false   // ← Новое поле
 )
