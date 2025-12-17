@@ -1,104 +1,107 @@
-package com.example.test2  // Твоя package
+package com.example.test2
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log  // Для лога
+import android.util.Log
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.test2.data.AppDatabase
 import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityLoginBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
 import com.example.test2.ui.AuthViewModelFactory
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var repository: UserRepository
-    private val viewModel: AuthViewModel by viewModels {
-        AuthViewModelFactory(repository, this)
-    }
+    private lateinit var viewModel: AuthViewModel  // ← Теперь lateinit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            Log.d("LoginActivity", "onCreate started")  // Лог 1
-            val database = AppDatabase.getDatabase(this)
-            repository = UserRepository(
-                database,
-                NetworkModule.provideMyApiService(this),
-                this
-            )
-            Log.d("LoginActivity", "Repository created")  // Лог 2
+        Log.d("LoginActivity", "onCreate started")
 
-            binding = ActivityLoginBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-            Log.d("LoginActivity", "Binding set")  // Лог 3
+        // Инициализируем БД и репозиторий
+        val database = AppDatabase.getDatabase(this)
+        repository = UserRepository(
+            database,
+            NetworkModule.provideMyApiService(this),
+            this
+        )
+        Log.d("LoginActivity", "Repository created")
 
-            // Авто-логин при запуске
-            Log.d("LoginActivity", "Checking autoLogin...")  // Лог 4
-            val isAuto = viewModel.autoLogin()
-            Log.d("LoginActivity", "autoLogin result: $isAuto")  // Лог 5
-            if (isAuto) {
-                Log.d("LoginActivity", "Navigating to Main")  // Лог 6
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
-                return
-            }
-            Log.d("LoginActivity", "No auto-login, showing screen")  // Лог 7
+        // Создаём ViewModel вручную ПОСЛЕ инициализации repository
+        viewModel = AuthViewModelFactory(repository, this).create(AuthViewModel::class.java)
 
-            // Наблюдение за результатом
-            viewModel.authResult.observe(this) { result ->
-                Log.d("LoginActivity", "authResult changed: $result")  // Лог 8
-                if (result.isSuccess) {
-                    val username = binding.etUsername.text.toString()  // Username из поля ввода
-                    // Сохрани username в SharedPreferences
-                    saveUsername(username)
-                    Toast.makeText(this, result.getOrNull(), Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        Log.d("LoginActivity", "UI set")
+
+        // Авто-логин
+        if (viewModel.autoLogin()) {
+            Log.d("LoginActivity", "Auto-login successful — going to MainActivity")
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        // Наблюдение за результатом логина
+        viewModel.authResult.observe(this) { result ->
+            Log.d("LoginActivity", "authResult: $result")
+            if (result.isSuccess) {
+                val username = binding.etUsername.text.toString().trim()
+
+                saveUsername(username)
+
+                // Сохраняем user_id после логина
+                lifecycleScope.launch {
+                    try {
+                        val loginResponse = repository.api.login(
+                            com.example.test2.network.LoginRequest(username = username, password = binding.etPassword.text.toString())
+                        )
+                        val userId = loginResponse.user_id.toLong()
+                        saveCurrentUserId(userId)
+                        Log.d("LoginActivity", "Saved current_user_id = $userId")
+                    } catch (e: Exception) {
+                        Log.e("LoginActivity", "Failed to save user_id: ${e.message}")
+                    }
+
+                    Toast.makeText(this@LoginActivity, "Вход успешен", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                     finish()
-                } else {
-                    val error = result.exceptionOrNull()?.message ?: "Unknown error"
-                    Log.e("LoginActivity", "Login error: $error")  // Лог ошибки
-                    Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Toast.makeText(this, result.exceptionOrNull()?.message ?: "Ошибка входа", Toast.LENGTH_SHORT).show()
             }
+        }
 
-            // Кнопка Login
-            binding.btnLogin.setOnClickListener {
-                Log.d("LoginActivity", "Login button clicked")  // Лог 9
-                val username = binding.etUsername.text.toString()
-                val password = binding.etPassword.text.toString()
-                if (username.isNotBlank() && password.isNotBlank()) {
-                    viewModel.login(username, password)
-                    Log.d("LoginActivity", "Login called with $username")  // Лог 10
-                } else {
-                    Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show()
-                }
+        binding.btnLogin.setOnClickListener {
+            val username = binding.etUsername.text.toString().trim()
+            val password = binding.etPassword.text.toString()
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                viewModel.login(username, password)
+            } else {
+                Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
             }
+        }
 
-            // Переход на регистрацию
-            binding.tvRegister.setOnClickListener {
-                Log.d("LoginActivity", "Register link clicked")  // Лог 11
-                startActivity(Intent(this, RegisterActivity::class.java))
-            }
-
-            Log.d("LoginActivity", "onCreate finished")  // Лог 12
-        } catch (e: Exception) {
-            Log.e("LoginActivity", "onCreate error: ${e.message}", e)  // Полный лог краша
-            Toast.makeText(this, "Error in LoginActivity: ${e.message}", Toast.LENGTH_LONG).show()
+        binding.tvRegister.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
-    // Метод для сохранения username
     private fun saveUsername(username: String) {
-        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putString("current_username", username)
-            apply()
-        }
+        val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("current_username", username).apply()
         Log.d("LoginActivity", "Username saved: $username")
+    }
+
+    private fun saveCurrentUserId(userId: Long) {
+        val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putLong("current_user_id", userId).apply()
+        Log.d("LoginActivity", "Saved current_user_id = $userId")
     }
 }

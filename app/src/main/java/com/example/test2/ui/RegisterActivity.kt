@@ -3,16 +3,18 @@ package com.example.test2
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.test2.data.AppDatabase
 import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.ActivityRegisterBinding
 import com.example.test2.network.NetworkModule
 import com.example.test2.ui.AuthViewModel
 import com.example.test2.ui.AuthViewModelFactory
-import android.util.Log
+import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -24,10 +26,11 @@ class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("RegisterActivity", "onCreate started")
+
         val database = AppDatabase.getDatabase(this)
         repository = UserRepository(
             database,
-            NetworkModule.provideMyApiService(this), // no context needed
+            NetworkModule.provideMyApiService(this),
             this
         )
         Log.d("RegisterActivity", "Repository created")
@@ -36,32 +39,58 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(binding.root)
         Log.d("RegisterActivity", "Binding set")
 
-        // Наблюдение за результатом
+        // Наблюдение за результатом регистрации
         viewModel.authResult.observe(this) { result ->
             Log.d("RegisterActivity", "authResult changed: $result")
             if (result.isSuccess) {
-                val username = binding.etUsername.text.toString()
+                val username = binding.etUsername.text.toString().trim()
+                val password = binding.etPassword.text.toString()
+
                 saveUsername(username)
-                Toast.makeText(this, result.getOrNull(), Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+
+                // Ключевой фикс: получаем user_id после регистрации
+                lifecycleScope.launch {
+                    try {
+                        // Делаем login, чтобы получить user_id из ответа (как в repository.register)
+                        val loginResponse = repository.api.login(
+                            com.example.test2.network.LoginRequest(username = username, password = password)
+                        )
+                        val userId = loginResponse.user_id.toLong()
+
+                        // Сохраняем user_id
+                        val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putLong("current_user_id", userId).apply()
+                        Log.d("RegisterActivity", "Saved current_user_id = $userId after registration")
+
+                        Toast.makeText(this@RegisterActivity, "Регистрация успешна", Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
+                        finish()
+                    } catch (e: Exception) {
+                        Log.e("RegisterActivity", "Failed to get user_id after register: ${e.message}")
+                        Toast.makeText(this@RegisterActivity, "Регистрация прошла, но ошибка входа", Toast.LENGTH_SHORT).show()
+                        // Всё равно переходим — пользователь уже создан
+                        startActivity(Intent(this@RegisterActivity, MainActivity::class.java))
+                        finish()
+                    }
+                }
             } else {
-                val error = result.exceptionOrNull()?.message ?: "Unknown error"
+                val error = result.exceptionOrNull()?.message ?: "Неизвестная ошибка"
                 Log.e("RegisterActivity", "Register error: $error")
                 Toast.makeText(this, error, Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Кнопка Register
+        // Кнопка регистрации
         binding.btnRegister.setOnClickListener {
             Log.d("RegisterActivity", "Register button clicked")
-            val username = binding.etUsername.text.toString()
+            val username = binding.etUsername.text.toString().trim()
             val password = binding.etPassword.text.toString()
-            if (username.isNotBlank() && password.isNotBlank()) {
-                viewModel.register(username, password)
-            } else {
-                Toast.makeText(this, "Fill all fields", Toast.LENGTH_SHORT).show()
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Заполните все поля", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            viewModel.register(username, password)
         }
 
         // Переход на логин
@@ -70,12 +99,13 @@ class RegisterActivity : AppCompatActivity() {
             finish()
         }
     }
+
     private fun saveUsername(username: String) {
         val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
             putString("current_username", username)
             apply()
         }
-        Log.d("LoginActivity", "Username saved: $username")
+        Log.d("RegisterActivity", "Username saved: $username")
     }
 }

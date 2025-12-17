@@ -8,24 +8,25 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.test2.AddDishActivity
 import com.example.test2.MainActivity
+import com.example.test2.data.AppDatabase
+import com.example.test2.data.User.UserRepository
 import com.example.test2.databinding.FragmentHomeBinding
 import com.example.test2.ui.DailyMealAdapter
-import com.example.test2.ui.DailyMealViewModel
-import com.example.test2.ui.DailyMealViewModelFactory
+import com.example.test2.network.NetworkModule
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val dailyMealViewModel: DailyMealViewModel by activityViewModels {
-        DailyMealViewModelFactory((requireActivity() as MainActivity).repository)
-    }
-
+    private lateinit var repository: UserRepository
     private lateinit var dailyMealAdapter: DailyMealAdapter
 
     private var userId = -1L
@@ -41,9 +42,21 @@ class HomeFragment : Fragment() {
 
         userId = getUserIdFromPrefs()
 
-        setupDailyMealRecyclerView()
-        subscribeToDailyMeals()  // Подписка один раз
-        loadDailyMeals()         // Первая загрузка
+        if (userId == -1L) {
+            Log.e("HomeFragment", "User ID not found")
+            Toast.makeText(requireContext(), "Ошибка авторизации", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val database = AppDatabase.getDatabase(requireContext())
+        repository = UserRepository(
+            database,
+            NetworkModule.provideMyApiService(requireContext()),
+            requireContext()
+        )
+
+        setupRecyclerView()
+        loadDailyMealsFromDB()  // Первая загрузка
 
         binding.btnAddDish.setOnClickListener {
             val intent = Intent(requireContext(), AddDishActivity::class.java)
@@ -53,17 +66,19 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "onViewCreated finished")
     }
 
-    private fun setupDailyMealRecyclerView() {
+    private fun setupRecyclerView() {
         dailyMealAdapter = DailyMealAdapter { dailyMeal ->
-            Log.d("HomeFragment", "DailyMeal clicked: ${dailyMeal.totalCalories}")
+            Log.d("HomeFragment", "DailyMeal clicked: ${dailyMeal.totalCalories} kcal")
+            // Здесь можно открыть детали
         }
         binding.rvDailyMeals.layoutManager = LinearLayoutManager(requireContext())
         binding.rvDailyMeals.adapter = dailyMealAdapter
     }
 
-    private fun subscribeToDailyMeals() {
-        dailyMealViewModel.dailyMeals.observe(viewLifecycleOwner) { dailyMeals ->
-            Log.d("HomeFragment", "UI updated with ${dailyMeals.size} daily meals")
+    private fun loadDailyMealsFromDB() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val dailyMeals = repository.getTodayDailyMealsByUser(userId).first()
+            Log.d("HomeFragment", "Loaded ${dailyMeals.size} daily meals from DB")
             dailyMeals.forEach {
                 Log.d("HomeFragment", "DailyMeal: ${it.totalCalories} kcal, meals: ${it.meal_ids}")
             }
@@ -71,29 +86,25 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun loadDailyMeals() {
-        Log.d("HomeFragment", "loadDailyMeals called for userId = $userId")
-        dailyMealViewModel.loadDailyMeals(userId)
-    }
-
-    // Ключевой фикс: обновляем после возврата на экран (после логина и sync)
     override fun onResume() {
         super.onResume()
         Log.d("HomeFragment", "onResume — reloading daily meals")
-        loadDailyMeals()
+        loadDailyMealsFromDB()  // Гарантированное обновление после sync и возврата
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ADD_DISH_REQUEST_CODE && resultCode == RESULT_OK) {
-            Log.d("HomeFragment", "Returned from AddDish — reloading")
-            loadDailyMeals()
+            Log.d("HomeFragment", "Returned from AddDish — reloading via onResume")
+            // onResume сработает автоматически
         }
     }
 
     private fun getUserIdFromPrefs(): Long {
         val sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        return sharedPref.getLong("current_user_id", -1L)
+        val id = sharedPref.getLong("current_user_id", -1L)
+        Log.d("HomeFragment", "getUserIdFromPrefs = $id")
+        return id
     }
 
     override fun onDestroyView() {
@@ -105,4 +116,3 @@ class HomeFragment : Fragment() {
         const val ADD_DISH_REQUEST_CODE = 1002
     }
 }
-
