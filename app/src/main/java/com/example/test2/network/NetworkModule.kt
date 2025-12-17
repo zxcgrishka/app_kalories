@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
     // ТОЛЬКО ваш бэкенд URL - Nutritionix удалён
-    private const val YOUR_API_BASE_URL = "http://10.0.2.2:8000/"
+    private const val YOUR_API_BASE_URL = "http://213.21.240.207:8000/"
 
     // ===== ВАШ БЭКЕНД API =====
     fun provideMyApiService(context: Context): ApiService {
