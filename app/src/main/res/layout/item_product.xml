@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:background="@drawable/gradient_background_item">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    android:background="@drawable/nutrition_background"
+    android:padding="12dp">
 
+    <!-- CheckBox слева -->
     <CheckBox
         android:id="@+id/cbProduct"
         android:layout_width="wrap_content"
@@ -15,118 +17,131 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Название продукта -->
     <TextView
         android:id="@+id/tvProductName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:fontFamily="@font/khula_regular"
+        android:layout_marginStart="12dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/khula_bold"
+        android:maxLines="1"
         android:text="Продукт"
         android:textColor="@color/c5"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/weightLayout"
-        app:layout_constraintEnd_toStartOf="@+id/tvProductCalories"
-        app:layout_constraintStart_toEndOf="@+id/cbProduct"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@id/tvProductCalories"
+        app:layout_constraintStart_toEndOf="@id/cbProduct"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Калории продукта -->
     <TextView
         android:id="@+id/tvProductCalories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/khula_regular"
         android:text="100 ккал/100г"
         android:textColor="@color/c5"
         android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvCalculatedValues"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Строка с весом порции -->
+    <!-- Контейнер для управления весом (скрыт по умолчанию) -->
     <LinearLayout
-        android:id="@+id/weightLayout"
+        android:id="@+id/weightContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/btnIncreaseWeight"
-        app:layout_constraintStart_toEndOf="@+id/cbProduct"
-        app:layout_constraintTop_toBottomOf="@+id/tvProductName">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvProductName">
 
+        <!-- Текст "Вес:" -->
         <TextView
             android:id="@+id/tvWeightLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/khula_regular"
             android:text="Вес:"
             android:textColor="@color/c5"
-            android:textSize="12sp"
-            android:layout_marginEnd="4dp"/>
+            android:textSize="14sp" />
 
+        <!-- Кнопка "минус" -->
+        <TextView
+            android:id="@+id/btnMinus"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/btn_circle_background"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground" />
+
+        <!-- Поле для ввода веса -->
         <EditText
             android:id="@+id/etProductWeight"
-            android:layout_width="60dp"
-            android:layout_height="32dp"
+            android:layout_width="70dp"
+            android:layout_height="36dp"
             android:background="@drawable/edittext_background"
+            android:fontFamily="@font/khula_regular"
             android:gravity="center"
             android:hint="100"
             android:inputType="number"
+            android:padding="4dp"
             android:text="100"
             android:textColor="@color/c5"
-            android:textSize="12sp"
-            android:padding="4dp" />
+            android:textSize="14sp" />
 
+        <!-- Текст "г" -->
         <TextView
             android:id="@+id/tvGramLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:fontFamily="@font/khula_regular"
             android:text="г"
             android:textColor="@color/c5"
-            android:textSize="12sp"
-            android:layout_marginStart="2dp"/>
+            android:textSize="14sp" />
+
+        <!-- Кнопка "плюс" -->
+        <TextView
+            android:id="@+id/btnPlus"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/btn_circle_background"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground" />
+
     </LinearLayout>
-
-    <!-- Кнопки изменения веса -->
-    <Button
-        android:id="@+id/btnDecreaseWeight"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="4dp"
-        android:background="@drawable/button_circle"
-        android:text="-"
-        android:textColor="@color/c5"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/weightLayout"
-        app:layout_constraintEnd_toStartOf="@+id/btnIncreaseWeight"
-        app:layout_constraintTop_toTopOf="@+id/weightLayout" />
-
-    <Button
-        android:id="@+id/btnIncreaseWeight"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="8dp"
-        android:background="@drawable/button_circle"
-        android:text="+"
-        android:textColor="@color/c5"
-        android:textSize="14sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/weightLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/weightLayout" />
 
     <!-- Расчетные значения -->
     <TextView
         android:id="@+id/tvCalculatedValues"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/khula_regular"
         android:text=""
         android:textColor="@color/c3"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/cbProduct"
-        app:layout_constraintTop_toBottomOf="@+id/tvProductCalories" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weightContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

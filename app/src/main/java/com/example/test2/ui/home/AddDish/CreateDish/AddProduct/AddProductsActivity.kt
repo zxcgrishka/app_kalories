@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.view.animation.AlphaAnimation
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,7 @@ import com.example.test2.utils.CameraActivity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.max
+import kotlin.math.min
 import java.io.InputStream
 
 class AddProductsActivity : AppCompatActivity() {
@@ -33,6 +35,7 @@ class AddProductsActivity : AppCompatActivity() {
     private var allDetections: List<Detection> = emptyList()
     private var currentDetectionIndex: Int = 0
     private var processedImages: MutableSet<Int> = mutableSetOf()
+    private var currentSelectedProductName: String = ""
 
     private val REQUEST_PICK_IMAGE = 10
     private val REQUEST_CAMERA = 20
@@ -144,28 +147,35 @@ class AddProductsActivity : AppCompatActivity() {
             saveCurrentProduct() //лог1
         }
 
-        // Кнопки для навигации между продуктами
+        // Настройка кнопок оверлея
+        binding.btnCloseOverlay?.setOnClickListener {
+            hideImageOverlay()
+        }
+
+        binding.btnSelectProduct?.setOnClickListener {
+            selectCurrentProductAndCloseOverlay()
+        }
+
+        binding.btnManualInput?.setOnClickListener {
+            hideImageOverlay()
+            // Очищаем только название, остальные поля остаются для ручного ввода
+            binding.edName?.setText("")
+        }
+
+        // Кнопки для навигации между продуктами в оверлее
         binding.btnPrevProduct?.setOnClickListener {
-            showPreviousProduct()
+            showPreviousProductInOverlay()
         }
 
         binding.btnNextProduct?.setOnClickListener {
-            showNextProduct()
-        }
-
-        // Кнопка для выбора продукта из списка
-        binding.btnSelectProduct?.setOnClickListener {
-            showProductSelectionDialog()
+            showNextProductInOverlay()
         }
 
         // Инициализация UI
-        updateNavigationButtons()
         binding.tvList?.text = "Выберите изображение с едой"
 
-        // Скрываем кнопки навигации до загрузки изображения
-        binding.btnPrevProduct?.visibility = View.GONE
-        binding.btnNextProduct?.visibility = View.GONE
-        binding.btnSelectProduct?.visibility = View.GONE
+        // Скрываем оверлей по умолчанию
+        binding.imageOverlayContainer?.visibility = View.GONE
 
         val foodName = intent.getStringExtra("food_name")
         if (!foodName.isNullOrBlank()) {
@@ -174,6 +184,373 @@ class AddProductsActivity : AppCompatActivity() {
             searchFoodInDatabase(foodName)
         }
     }
+
+    // =============== ФУНКЦИИ ОВЕРЛЕЯ ===============
+
+    private fun showImageOverlay() {
+        binding.imageOverlayContainer?.visibility = View.VISIBLE
+        binding.contentContainer?.isEnabled = false
+
+        // Анимация появления
+        val fadeIn = AlphaAnimation(0f, 1f)
+        fadeIn.duration = 300
+        binding.imageOverlayContainer?.startAnimation(fadeIn)
+
+        // Блокируем прокрутку
+        binding.contentContainer?.isScrollContainer = false
+    }
+
+    private fun hideImageOverlay() {
+        // Анимация исчезновения
+        val fadeOut = AlphaAnimation(1f, 0f)
+        fadeOut.duration = 200
+        binding.imageOverlayContainer?.startAnimation(fadeOut)
+
+        // Скрываем оверлей после анимации
+        binding.imageOverlayContainer?.postDelayed({
+            binding.imageOverlayContainer?.visibility = View.GONE
+            binding.contentContainer?.isEnabled = true
+            binding.contentContainer?.isScrollContainer = true
+        }, 200)
+    }
+
+    private fun selectCurrentProductAndCloseOverlay() {
+        if (allDetections.isNotEmpty() && currentDetectionIndex < allDetections.size) {
+            val detection = allDetections[currentDetectionIndex]
+            currentSelectedProductName = detection.label
+
+            // Заполняем форму данными текущего продукта
+            fillNutritionFieldsInForm(currentSelectedProductName)
+
+            // Закрываем оверлей
+            hideImageOverlay()
+
+            Toast.makeText(
+                this,
+                "Выбран продукт: $currentSelectedProductName",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            // Не показываем диалог здесь - он будет показан после сохранения
+        } else {
+            hideImageOverlay()
+        }
+    }
+
+    private fun checkForContinueAfterSave() {
+        if (allDetections.isNotEmpty() && currentDetectionIndex < allDetections.size - 1) {
+            // Если есть еще продукты и мы не на последнем
+            showContinueDialog()
+        } else {
+            // Если больше нет продуктов или мы на последнем - выходим
+            finish()
+        }
+    }
+    private fun showContinueDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Добавить еще продукт?")
+            .setMessage("На изображении найдены еще продукты. Хотите добавить следующий?")
+            .setPositiveButton("Да, добавить следующий") { _, _ ->
+                // Показываем следующий продукт в оверлее
+                showNextProductInOverlay()
+                showImageOverlay()
+            }
+            .setNegativeButton("Нет, закончить") { _, _ ->
+                // Возвращаемся на предыдущую активность
+                finish()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun updateOverlayUI() {
+        if (allDetections.isEmpty()) return
+
+        val detection = allDetections[currentDetectionIndex]
+        val confidencePercent = (detection.confidence * 100).toInt()
+
+        // Обновляем информацию о продукте в формате "Продукт 1 из 3 - Название"
+        val counterText = "Продукт ${currentDetectionIndex + 1} из ${allDetections.size} - ${detection.label}"
+        binding.tvProductInfo?.text = counterText
+
+        // Показываем изображение с bounding box
+        val annotatedBitmap = drawSquareDetectionForOverlay(originalBitmap, detection)
+        showImageInOverlay(annotatedBitmap)
+
+        // Обновляем состояние кнопок навигации
+        updateOverlayNavigationButtons()
+    }
+
+    private fun drawSquareDetectionForOverlay(bitmap: Bitmap, detection: Detection): Bitmap {
+        // Создаем квадратную область для обрезки
+        val box = detection.box
+        val cropSize = kotlin.math.max(box.width(), box.height())
+
+        // Центрируем область обрезки
+        val centerX = box.centerX()
+        val centerY = box.centerY()
+        val halfSize = cropSize / 2
+
+        val cropRect = Rect(
+            kotlin.math.max(0, (centerX - halfSize).toInt()),
+            kotlin.math.max(0, (centerY - halfSize).toInt()),
+            kotlin.math.min(bitmap.width, (centerX + halfSize).toInt()),
+            kotlin.math.min(bitmap.height, (centerY + halfSize).toInt())
+        )
+
+        // Вырезаем квадратную область
+        val croppedBitmap = Bitmap.createBitmap(bitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height())
+
+        // Создаем квадратный битмап для отображения
+        val squareSize = kotlin.math.max(cropRect.width(), cropRect.height())
+        val squareBitmap = Bitmap.createBitmap(squareSize, squareSize, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(squareBitmap)
+
+        // Заливаем фон
+        canvas.drawColor(Color.WHITE)
+
+        // Масштабируем и центрируем изображение
+        val scale = squareSize.toFloat() / kotlin.math.max(croppedBitmap.width, croppedBitmap.height).toFloat()
+        val scaledWidth = (croppedBitmap.width * scale).toInt()
+        val scaledHeight = (croppedBitmap.height * scale).toInt()
+        val offsetX = (squareSize - scaledWidth) / 2
+        val offsetY = (squareSize - scaledHeight) / 2
+
+        val scaledBitmap = Bitmap.createScaledBitmap(croppedBitmap, scaledWidth, scaledHeight, true)
+        canvas.drawBitmap(scaledBitmap, offsetX.toFloat(), offsetY.toFloat(), null)
+
+        // Рисуем bounding box на квадратном изображении
+        val boxPaint = Paint().apply {
+            color = Color.GREEN
+            style = Paint.Style.STROKE
+            strokeWidth = kotlin.math.max(4f, 6f * (squareSize / 1000f))
+        }
+
+        // Масштабируем координаты bounding box
+        val scaledBox = RectF(
+            offsetX.toFloat(),
+            offsetY.toFloat(),
+            offsetX + scaledWidth.toFloat(),
+            offsetY + scaledHeight.toFloat()
+        )
+
+        canvas.drawRect(scaledBox, boxPaint)
+
+        // Вычисляем confidencePercent
+        val confidencePercent = (detection.confidence * 100).toInt()
+
+        // Добавляем текст с названием
+        val label = "${detection.label} ($confidencePercent%)"
+        val textPaint = Paint().apply {
+            color = Color.RED
+            textSize = kotlin.math.max(24f, 32f * (squareSize / 1000f))
+            style = Paint.Style.FILL
+            isAntiAlias = true
+        }
+
+        val textBgPaint = Paint().apply {
+            color = Color.argb(200, 0, 0, 0)
+            style = Paint.Style.FILL
+        }
+
+        val textWidth = textPaint.measureText(label)
+        val textHeight = textPaint.textSize
+
+        // Фон для текста
+        val textBgRect = RectF(
+            scaledBox.left,
+            scaledBox.top - textHeight - 10,
+            scaledBox.left + textWidth + 20,
+            scaledBox.top - 5
+        )
+        canvas.drawRoundRect(textBgRect, 5f, 5f, textBgPaint)
+
+        // Сам текст
+        canvas.drawText(
+            label,
+            scaledBox.left + 10,
+            scaledBox.top - 15,
+            textPaint
+        )
+
+        return squareBitmap
+    }
+
+    private fun showImageInOverlay(bitmap: Bitmap) {
+        val tvList = binding.tvList ?: return
+        val container = binding.imageSquareContainer
+
+        // Получаем размеры с безопасным вызовом
+        val containerWidth = container?.width ?: 0
+        val containerHeight = container?.height ?: 0
+
+        if (containerWidth <= 0 || containerHeight <= 0) {
+            // Если контейнер еще не измерен, ждем следующего кадра
+            container?.post {
+                showImageInOverlay(bitmap)
+            }
+            return
+        }
+
+        // Создаем квадратное изображение для контейнера
+        val squareSize = kotlin.math.min(containerWidth, containerHeight)
+        val previewBitmap = Bitmap.createScaledBitmap(bitmap, squareSize, squareSize, true)
+
+        tvList.text = ""
+        tvList.setBackgroundBitmap(previewBitmap)
+    }
+
+    private fun showPreviousProductInOverlay() {
+        if (allDetections.isEmpty()) return
+
+        currentDetectionIndex--
+        if (currentDetectionIndex < 0) {
+            currentDetectionIndex = allDetections.size - 1
+        }
+
+        updateOverlayUI()
+    }
+
+    private fun showNextProductInOverlay() {
+        if (allDetections.isEmpty()) return
+
+        currentDetectionIndex++
+        if (currentDetectionIndex >= allDetections.size) {
+            currentDetectionIndex = 0
+        }
+
+        updateOverlayUI()
+    }
+
+    private fun updateOverlayNavigationButtons() {
+        if (allDetections.isEmpty()) {
+            binding.btnPrevProduct?.visibility = View.GONE
+            binding.btnNextProduct?.visibility = View.GONE
+            binding.btnSelectProduct?.isEnabled = false
+        } else {
+            binding.btnSelectProduct?.isEnabled = true
+
+            // Показываем стрелки если есть больше 1 продукта
+            if (allDetections.size > 1) {
+                binding.btnPrevProduct?.visibility = View.VISIBLE
+                binding.btnNextProduct?.visibility = View.VISIBLE
+            } else {
+                binding.btnPrevProduct?.visibility = View.GONE
+                binding.btnNextProduct?.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun fillNutritionFieldsInForm(foodName: String) {
+        Log.d(TAG, "Заполнение полей формы для продукта: $foodName")
+
+        // Устанавливаем название продукта
+        binding.edName?.setText(foodName)
+
+        // Ищем питательные значения
+        val nutrition = findNutritionInDatabase(foodName)
+
+        if (nutrition != null) {
+            // Нашли в локальной базе
+            binding.edKalories?.setText(nutrition.calories.toString())
+            binding.edProteins?.setText(nutrition.proteins.toString())
+            binding.edFats?.setText(nutrition.fats.toString())
+            binding.edCarbohydrates?.setText(nutrition.carbs.toString())
+
+            Log.d(TAG, "Заполнены данные из локальной базы для $foodName")
+        } else {
+            // Не нашли в локальной базе, используем детектор или стандартные значения
+            try {
+                if (::detector.isInitialized) {
+                    val nutritionFromDetector = detector.getNutritionForFood(foodName)
+                    binding.edKalories?.setText(nutritionFromDetector.calories.toString())
+                    binding.edProteins?.setText(nutritionFromDetector.proteins.toString())
+                    binding.edFats?.setText(nutritionFromDetector.fats.toString())
+                    binding.edCarbohydrates?.setText(nutritionFromDetector.carbs.toString())
+
+                    Log.d(TAG, "Заполнены данные из детектора для $foodName")
+                } else {
+                    setDefaultNutritionValues()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка получения данных из детектора: ${e.message}", e)
+                setDefaultNutritionValues()
+            }
+        }
+    }
+
+    // Обновленная функция обработки изображения
+    private fun processImageAndShowOverlay(bitmap: Bitmap) {
+        Log.d(TAG, "Начало обработки изображения, размер: ${bitmap.width}x${bitmap.height}")
+
+        // Показываем оверлей с сообщением о загрузке
+        showImageOverlay()
+        binding.tvList?.text = "Обработка изображения нейросетью..."
+        binding.tvProductInfo?.text = "Обработка..."
+
+        Thread {
+            try {
+                if (!::detector.isInitialized) {
+                    runOnUiThread {
+                        Toast.makeText(this, "Нейросеть не готова", Toast.LENGTH_SHORT).show()
+                        hideImageOverlay()
+                    }
+                    return@Thread
+                }
+
+                val detections = detector.detectFoodOnly(bitmap)
+                Log.d(TAG, "Найдено объектов: ${detections.size}")
+
+                runOnUiThread {
+                    if (detections.isEmpty()) {
+                        binding.tvList?.text = "Еда не обнаружена\nПопробуйте другое изображение"
+                        binding.tvProductInfo?.text = "Объекты не найдены"
+                        Toast.makeText(
+                            this,
+                            "Не удалось распознать еду. Убедитесь, что еда хорошо видна на фото",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        // Не скрываем оверлей сразу, показываем сообщение
+                        return@runOnUiThread
+                    }
+
+                    // Сохраняем все детекции
+                    allDetections = detections
+                    currentDetectionIndex = 0
+                    processedImages.clear()
+
+                    Toast.makeText(
+                        this,
+                        "Найдено ${detections.size} продуктов!",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    // Обновляем UI оверлея
+                    updateOverlayUI()
+
+                    // Показываем кнопки навигации
+                    updateOverlayNavigationButtons()
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Ошибка детекции: ${e.message}", e)
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        "Ошибка обработки изображения нейросетью: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    binding.tvList?.text = "Ошибка обработки\nПопробуйте снова"
+                    binding.tvProductInfo?.text = "Ошибка"
+                }
+            }
+        }.start()
+    }
+
+// Удалите старую функцию processImageWithDetection или оставьте для совместимости
+// но основную логику перенесите в processImageAndShowOverlay
+
+    // =============== ОСТАЛЬНЫЕ ФУНКЦИИ ===============
 
     private fun pickImageFromGallery() {
         Log.d(TAG, "Открытие галереи")
@@ -265,13 +642,17 @@ class AddProductsActivity : AppCompatActivity() {
 
             bitmap = rotateImageIfRequired(bitmap!!, uri)
             originalBitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
-            processImageWithDetection(originalBitmap)
+
+            // Обрабатываем изображение и показываем оверлей
+            processImageAndShowOverlay(originalBitmap)
 
         } catch (e: Exception) {
             Log.e(TAG, "Ошибка загрузки изображения: ${e.message}", e)
             Toast.makeText(this, "Ошибка загрузки изображения: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
         }
     }
+
+
 
     private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
         val height = options.outHeight
@@ -321,268 +702,6 @@ class AddProductsActivity : AppCompatActivity() {
         val matrix = Matrix()
         matrix.postRotate(degrees)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-
-    private fun processImageWithDetection(bitmap: Bitmap) {
-        Log.d(TAG, "Начало обработки изображения, размер: ${bitmap.width}x${bitmap.height}")
-        binding.tvList?.text = "Обработка изображения нейросетью..."
-
-        Thread {
-            try {
-                if (!::detector.isInitialized) {
-                    runOnUiThread {
-                        Toast.makeText(this, "Нейросеть не готова", Toast.LENGTH_SHORT).show()
-                    }
-                    return@Thread
-                }
-
-                val detections = detector.detectFoodOnly(bitmap)
-                Log.d(TAG, "Найдено объектов: ${detections.size}")
-
-                runOnUiThread {
-                    if (detections.isEmpty()) {
-                        binding.tvList?.text = "Еда не обнаружена\nПопробуйте другое изображение"
-                        Toast.makeText(
-                            this,
-                            "Не удалось распознать еду. Убедитесь, что еда хорошо видна на фото",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        return@runOnUiThread
-                    }
-
-                    // Сохраняем все детекции
-                    allDetections = detections
-                    currentDetectionIndex = 0
-                    processedImages.clear()
-
-                    // Показываем статистику
-                    val uniqueFoods = detections.map { it.label }.distinct()
-                    val statsText = "Найдено ${detections.size} объектов еды:\n" +
-                            uniqueFoods.joinToString(", ")
-
-                    Toast.makeText(
-                        this,
-                        "Найдено ${detections.size} продуктов!",
-                        Toast.LENGTH_LONG
-                    ).show()
-
-                    // Показываем первый продукт
-                    showCurrentProduct()
-
-                    // Показываем кнопки навигации
-                    binding.btnPrevProduct?.visibility = View.VISIBLE
-                    binding.btnNextProduct?.visibility = View.VISIBLE
-                    binding.btnSelectProduct?.visibility = View.VISIBLE
-
-                    updateNavigationButtons()
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Ошибка детекции: ${e.message}", e)
-                runOnUiThread {
-                    Toast.makeText(
-                        this,
-                        "Ошибка обработки изображения нейросетью: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    binding.tvList?.text = "Ошибка обработки\nПопробуйте снова"
-                }
-            }
-        }.start()
-    }
-
-    private fun showCurrentProduct() {
-        if (allDetections.isEmpty() || currentDetectionIndex >= allDetections.size) {
-            return
-        }
-
-        val detection = allDetections[currentDetectionIndex]
-
-        // Рисуем bounding box только для текущего продукта
-        val annotatedBitmap = drawSingleDetection(originalBitmap, detection, currentDetectionIndex)
-        showImagePreview(annotatedBitmap)
-
-        // Заполняем поля данными текущего продукта
-        fillNutritionFields(detection.label)
-
-        // Показываем информацию о текущем продукте
-        val confidencePercent = (detection.confidence * 100).toInt()
-        val counterText = "Продукт ${currentDetectionIndex + 1} из ${allDetections.size}"
-        val infoText = "$counterText\n${detection.label} (${confidencePercent}%)\n" +
-                "Размер: ${detection.box.width().toInt()}x${detection.box.height().toInt()}"
-
-        binding.tvProductInfo?.text = infoText
-
-        // Проверяем, был ли этот продукт уже сохранен
-        if (processedImages.contains(currentDetectionIndex)) {
-            binding.button2?.text = "Уже сохранен"
-            binding.button2?.isEnabled = false
-        } else {
-            binding.button2?.text = "Сохранить продукт"
-            binding.button2?.isEnabled = true
-        }
-
-        updateNavigationButtons()
-    }
-
-    private fun drawSingleDetection(bitmap: Bitmap, detection: Detection, index: Int): Bitmap {
-        val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(mutableBitmap)
-
-        // Масштабируем толщину линии и текст
-        val scale = bitmap.width / 1000f
-
-        // Цвет для текущего продукта (зеленый), для других (серый)
-        val isCurrent = true // Только текущий продукт подсвечивается
-        val boxColor = if (isCurrent) Color.GREEN else Color.GRAY
-        val textColor = if (isCurrent) Color.RED else Color.DKGRAY
-
-        // Рисуем bounding box
-        val boxPaint = Paint().apply {
-            color = boxColor
-            style = Paint.Style.STROKE
-            strokeWidth = max(3f, 4f * scale)
-            if (!isCurrent) {
-                alpha = 100 // Прозрачность для неактивных
-            }
-        }
-
-        canvas.drawRect(detection.box, boxPaint)
-
-        // Текст с меткой и номером
-        val label = "${index + 1}. ${detection.label} ${(detection.confidence * 100).toInt()}%"
-        val textPaint = Paint().apply {
-            color = textColor
-            textSize = max(24f, 32f * scale)
-            style = Paint.Style.FILL
-            isAntiAlias = true
-            if (!isCurrent) {
-                alpha = 150
-            }
-        }
-
-        val textBgPaint = Paint().apply {
-            color = if (isCurrent) Color.argb(150, 0, 0, 0) else Color.argb(100, 100, 100, 100)
-            style = Paint.Style.FILL
-        }
-
-        val textWidth = textPaint.measureText(label)
-        val textHeight = textPaint.textSize
-
-        // Фон для текста
-        val textBgRect = RectF(
-            detection.box.left,
-            detection.box.top - textHeight - 5,
-            detection.box.left + textWidth + 10,
-            detection.box.top - 5
-        )
-        canvas.drawRect(textBgRect, textBgPaint)
-
-        // Сам текст
-        canvas.drawText(
-            label,
-            detection.box.left + 5,
-            detection.box.top - 10,
-            textPaint
-        )
-
-        return mutableBitmap
-    }
-
-    private fun showPreviousProduct() {
-        if (allDetections.isEmpty()) return
-
-        currentDetectionIndex--
-        if (currentDetectionIndex < 0) {
-            currentDetectionIndex = allDetections.size - 1
-        }
-
-        showCurrentProduct()
-    }
-
-    private fun showNextProduct() {
-        if (allDetections.isEmpty()) return
-
-        currentDetectionIndex++
-        if (currentDetectionIndex >= allDetections.size) {
-            currentDetectionIndex = 0
-        }
-
-        showCurrentProduct()
-    }
-
-    private fun showProductSelectionDialog() {
-        if (allDetections.isEmpty()) {
-            Toast.makeText(this, "Сначала загрузите изображение", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val productNames = allDetections.mapIndexed { index, detection ->
-            "${index + 1}. ${detection.label} (${(detection.confidence * 100).toInt()}%)"
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Выберите продукт")
-            .setItems(productNames.toTypedArray()) { _, which ->
-                currentDetectionIndex = which
-                showCurrentProduct()
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
-    }
-
-    private fun updateNavigationButtons() {
-        if (allDetections.isEmpty()) {
-            binding.btnPrevProduct?.isEnabled = false
-            binding.btnNextProduct?.isEnabled = false
-            binding.btnSelectProduct?.isEnabled = false
-        } else {
-            binding.btnPrevProduct?.isEnabled = true
-            binding.btnNextProduct?.isEnabled = true
-            binding.btnSelectProduct?.isEnabled = true
-
-            // Обновляем текст кнопок
-            binding.btnPrevProduct?.text = "← Предыдущий"
-            binding.btnNextProduct?.text = "Следующий →"
-        }
-    }
-
-    private fun fillNutritionFields(foodName: String) {
-        Log.d(TAG, "Заполнение полей для продукта: $foodName")
-
-        // Устанавливаем название продукта
-        binding.edName?.setText(foodName)
-
-        // Ищем питательные значения
-        val nutrition = findNutritionInDatabase(foodName)
-
-        if (nutrition != null) {
-            // Нашли в локальной базе
-            binding.edKalories?.setText(nutrition.calories.toString())
-            binding.edProteins?.setText(nutrition.proteins.toString())
-            binding.edFats?.setText(nutrition.fats.toString())
-            binding.edCarbohydrates?.setText(nutrition.carbs.toString())
-
-            Log.d(TAG, "Заполнены данные из локальной базы для $foodName")
-        } else {
-            // Не нашли в локальной базе, используем детектор
-            try {
-                if (::detector.isInitialized) {
-                    val nutritionFromDetector = detector.getNutritionForFood(foodName)
-                    binding.edKalories?.setText(nutritionFromDetector.calories.toString())
-                    binding.edProteins?.setText(nutritionFromDetector.proteins.toString())
-                    binding.edFats?.setText(nutritionFromDetector.fats.toString())
-                    binding.edCarbohydrates?.setText(nutritionFromDetector.carbs.toString())
-
-                    Log.d(TAG, "Заполнены данные из детектора для $foodName")
-                } else {
-                    setDefaultNutritionValues()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Ошибка получения данных из детектора: ${e.message}", e)
-                setDefaultNutritionValues()
-            }
-        }
     }
 
     private fun setDefaultNutritionValues() {
@@ -652,26 +771,6 @@ class AddProductsActivity : AppCompatActivity() {
             lowerFoodName.contains("суп") && !lowerFoodName.contains("борщ") -> foodNutritionDatabase["Суп"]
 
             else -> null
-        }
-    }
-
-    private fun showImagePreview(bitmap: Bitmap) {
-        val tvList = binding.tvList ?: return
-
-        if (tvList.width <= 0 || tvList.height <= 0) {
-            val previewBitmap = Bitmap.createScaledBitmap(bitmap, 300, 300, true)
-            tvList.text = ""
-            tvList.setBackgroundBitmap(previewBitmap)
-        } else {
-            val previewBitmap = Bitmap.createScaledBitmap(
-                bitmap,
-                tvList.width,
-                tvList.height,
-                true
-            )
-
-            tvList.text = ""
-            tvList.setBackgroundBitmap(previewBitmap)
         }
     }
 
@@ -787,17 +886,14 @@ class AddProductsActivity : AppCompatActivity() {
                         ).show()
                         Log.d(TAG, "Продукт '$name' не сохранён - уже существует в базе")
 
-                        // Продолжаем навигацию для нейросети или очищаем для ручного ввода
+                        // Проверяем, нужно ли продолжать
                         if (allDetections.isNotEmpty()) {
-                            processedImages.add(currentDetectionIndex)  // Помечаем как обработанный
-                            showNextProduct()  // Показываем следующий продукт
-                        } else {
-                            clearFields()
+                            processedImages.add(currentDetectionIndex)
+                            checkForContinueAfterSave()
                         }
                     }
                     return@launch  // не сохраняем дубликат
                 }
-                // конец проверки
 
                 // если продукта нет - создаём новый
                 val product = Product(
@@ -824,23 +920,8 @@ class AddProductsActivity : AppCompatActivity() {
                     ).show()
                     Log.d(TAG, "Продукт сохранен: $product")
 
-                    // Логика навигации
-                    if (allDetections.isNotEmpty()) {
-                        showNextProduct()
-
-                        // Показываем статистику
-                        val savedCount = processedImages.size
-                        val totalCount = allDetections.size
-                        if (savedCount == totalCount) {
-                            Toast.makeText(
-                                this@AddProductsActivity,
-                                "Все продукты обработаны!",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    } else {
-                        clearFields()  // Очищаем поля для ручного ввода
-                    }
+                    // Проверяем, нужно ли продолжать с другими продуктами
+                    checkForContinueAfterSave()
                 }
 
             } catch (e: Exception) {
@@ -856,14 +937,14 @@ class AddProductsActivity : AppCompatActivity() {
         }
     }
 
-    private fun clearFields() {
-        binding.edName?.setText("")
-        binding.edKalories?.setText("")
-        binding.edProteins?.setText("")
-        binding.edFats?.setText("")
-        binding.edCarbohydrates?.setText("")
-        binding.tvList?.text = "Продукт сохранен\nВыберите новое изображение"
-        binding.tvList?.setBackgroundBitmap(null)
+    private fun clearFormFields() {
+        runOnUiThread {
+            binding.edName?.setText("")
+            binding.edKalories?.setText("")
+            binding.edProteins?.setText("")
+            binding.edFats?.setText("")
+            binding.edCarbohydrates?.setText("")
+        }
     }
 
     override fun onDestroy() {

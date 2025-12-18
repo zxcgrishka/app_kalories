@@ -1,18 +1,22 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- БАЗОВАЯ тема (настройки) -->
-    <style name="Base.Theme.Test2" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="dynamicColorThemeOverlay">@null</item>
-        <item name="colorPrimary">@color/c1</item>
-        <item name="colorPrimaryVariant">@color/c5</item>
+<resources>
+    <style name="Base.Theme.Test2" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Только самое необходимое -->
+        <item name="colorPrimary">@color/c3</item>
+        <item name="colorPrimaryDark">@color/c3</item>
 
-        <!-- Для прозрачной навигации -->
+        <!-- Прозрачность -->
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowTranslucentNavigation">true</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-
-        <!-- Для прозрачного статус-бара -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowTranslucentStatus">true</item>
+
+        <!-- Стиль навигации -->
+        <item name="bottomNavigationStyle">@style/BottomNavigationViewStyle</item>
     </style>
 
+    <style name="BottomNavigationViewStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemTextColor">@color/c5</item>
+        <item name="itemIconTint">@color/c5</item>
+        <item name="android:background">@color/c2</item>
+    </style>
 </resources>

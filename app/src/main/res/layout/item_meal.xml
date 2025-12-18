@@ -1,56 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:background="@drawable/gradient_background"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/c1"
-        android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- CheckBox увеличенного размера -->
         <CheckBox
             android:id="@+id/cbMeal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:buttonTint="@color/c5" />
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            android:buttonTint="@color/c5"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
+        <!-- Название приема пищи - КРУПНЫЙ ТЕКСТ на всю ширину -->
         <TextView
             android:id="@+id/tvMealName"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:fontFamily="@font/khula_light"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/khula_bold"
+            android:maxLines="1"
+            android:singleLine="true"
             android:text="Завтрак"
             android:textColor="@color/c5"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/cbMeal"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvMealCalories"
-            android:layout_width="match_parent"
+        <!-- Контейнер для калорийности и даты в одну строку -->
+        <LinearLayout
+            android:id="@+id/infoContainer"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:text="500 ккал"
-            android:textColor="@color/c5"
-            android:textSize="16sp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginStart="16dp"
+            android:gravity="start"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/cbMeal"
+            app:layout_constraintTop_toBottomOf="@+id/tvMealName">
 
-        <TextView
-            android:id="@+id/tvMealDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dp"
-            android:fontFamily="@font/khula_bold"
-            android:text="17.11.2025"
-            android:textColor="@color/c5"
-            android:textSize="14sp" />
+            <!-- Калорийность -->
+            <TextView
+                android:id="@+id/tvMealCalories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/khula_regular"
+                android:text="500 ккал"
+                android:textColor="@color/c5"
+                android:textSize="18sp" />
 
-    </LinearLayout>
+            <!-- Разделитель -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:text=" • "
+                android:textColor="@color/c5"
+                android:textSize="18sp" />
+
+            <!-- Дата -->
+            <TextView
+                android:id="@+id/tvMealDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/khula_regular"
+                android:text="17.11.2025"
+                android:textColor="@color/c5"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
