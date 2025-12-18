@@ -1,6 +1,7 @@
 package com.example.test2
 
 import android.Manifest
+import android.view.inputmethod.InputMethodManager
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -29,6 +32,7 @@ import com.example.test2.ui.ProductViewModel
 import com.example.test2.ui.ProductViewModelFactory
 import com.example.test2.ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity
 import com.example.test2.ui.home.AddDish.CreateDish.AddProduct.Product
+import com.google.android.material.internal.ViewUtils.hideKeyboard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,6 +78,26 @@ class CreateDishActivity : AppCompatActivity() {
         binding = ActivityCreateDishBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Log.d(TAG, "Binding set — UI ready")
+        binding.etDishName.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_NEXT ||
+                actionId == EditorInfo.IME_ACTION_SEARCH ||
+                (event != null && event.keyCode == KeyEvent.KEYCODE_ENTER &&
+                        event.action == KeyEvent.ACTION_DOWN)) {
+
+                // Скрыть клавиатуру
+                hideKeyboard()
+
+                // Снять фокус с EditText
+                binding.etDishName.clearFocus()
+
+                // Можно также перевести фокус на другой элемент
+                // binding.btnSaveDish.requestFocus()
+
+                return@setOnEditorActionListener true
+            }
+            false
+        }
 
         userId = getUserIdFromPrefs()
 
@@ -164,6 +188,12 @@ class CreateDishActivity : AppCompatActivity() {
 
     private fun openImagePicker() {
         pickImageLauncher.launch("image/*")
+    }
+
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.etDishName.windowToken, 0)
     }
 
     private fun openCamera() {

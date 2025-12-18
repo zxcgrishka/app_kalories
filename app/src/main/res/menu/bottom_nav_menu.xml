@@ -8,10 +8,11 @@
     <item
         android:id="@+id/CalendarFragment"
         android:icon="@null"
-        android:title="@string/Calendar" />
+        android:title="Progress" />
 
     <item
         android:id="@+id/ProfileFragment"
         android:icon="@null"
-        android:title="@string/Profile" />
+        android:title="@string/Profile"
+        />
 </menu>

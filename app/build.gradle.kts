@@ -38,7 +38,6 @@ android {
 }
 
 dependencies {
-
     // AndroidX & Material
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -70,6 +69,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.legacy.support.v4)
     implementation(libs.androidx.fragment.ktx)
+    implementation(libs.play.services.analytics.impl)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
 

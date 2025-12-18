@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Общие отступы для заголовков всех активностей -->
+    <dimen name="header_margin_top">60dp</dimen>
+    <dimen name="header_icon_size">60dp</dimen>
+    <dimen name="header_icon_margin_end">14dp</dimen>
+    <dimen name="header_text_size">24sp</dimen>
+
+    <!-- Общие параметры для нижней кнопки во всех активностях -->
+    <dimen name="bottom_button_width">299dp</dimen>
+    <dimen name="bottom_button_height">65dp</dimen>
+    <dimen name="bottom_button_text_size">24sp</dimen>
+    <dimen name="bottom_button_margin_bottom">40dp</dimen>
+
+    <!-- Общие параметры кнопок -->
+    <dimen name="button_inset">4dp</dimen>
+</resources>

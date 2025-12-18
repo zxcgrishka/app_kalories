@@ -3,36 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
     android:background="@color/c2"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/c2"
-        android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Дата - занимает левую половину -->
         <TextView
             android:id="@+id/tvDailyMealDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="17.11.2025"
-            android:textColor="@color/c5"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/tvDailyMealCalories"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/khula_regular"
-            android:text="1500 ккал"
+            android:text="17.11.2025"
             android:textColor="@color/c5"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/tvDailyMealCalories"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.5" />
 
-    </LinearLayout>
+        <!-- Калорийность - занимает правую половину -->
+        <TextView
+            android:id="@+id/tvDailyMealCalories"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/khula_bold"
+            android:text="1500 ккал"
+            android:textColor="@color/c5"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="end"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvDailyMealDate"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.5" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>

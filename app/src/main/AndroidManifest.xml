@@ -20,14 +20,14 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+        android:theme="@style/Base.Theme.Test2"
         android:usesCleartextTraffic="true">
 
         <!-- Login Activity — теперь стартовая -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+            android:theme="@style/Base.Theme.Test2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -38,33 +38,33 @@
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Base.Theme.Test2" />
 
         <!-- Остальные активности без изменений -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Base.Theme.Test2" />
 
         <activity
             android:name=".CreateDishActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Base.Theme.Test2" />
 
         <activity
             android:name=".AddDishActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Base.Theme.Test2" />
 
         <activity
             android:name=".ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+            android:theme="@style/Base.Theme.Test2" />
 
         <activity
             android:name=".utils.CameraActivity"
             android:exported="false"
-            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+            android:theme="@style/Base.Theme.Test2"
             android:screenOrientation="portrait" />
 
     </application>

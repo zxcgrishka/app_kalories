@@ -5,262 +5,46 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
     tools:context=".ui.home.AddDish.CreateDish.AddProduct.AddProductsActivity">
 
-    <!-- TextView для отображения изображения -->
-    <TextView
-        android:id="@+id/tvList"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="#f0f0f0"
-        android:gravity="center"
-        android:text="Выберите изображение с едой"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Информация о текущем продукте -->
-    <TextView
-        android:id="@+id/tvProductInfo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:gravity="center"
-        android:text=""
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvList" />
-
-    <!-- Кнопки навигации между продуктами -->
+    <!-- ЗАГОЛОВОК -->
     <LinearLayout
-        android:id="@+id/navigationLayout"
-        android:layout_width="0dp"
+        android:id="@+id/headerContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvProductInfo">
-
-        <Button
-            android:id="@+id/btnPrevProduct"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/gradient_button_green"
-            android:fontFamily="@font/khula_bold"
-            android:insetTop="4dp"
-            android:insetBottom="4dp"
-            android:text="← Предыдущий"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:backgroundTint="@null"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnSelectProduct"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/gradient_button_green"
-            android:fontFamily="@font/khula_bold"
-            android:insetTop="4dp"
-            android:insetBottom="4dp"
-            android:text="Выбрать продукт"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:backgroundTint="@null"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/btnNextProduct"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/gradient_button_green"
-            android:fontFamily="@font/khula_bold"
-            android:insetTop="4dp"
-            android:insetBottom="4dp"
-            android:text="Следующий →"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            app:backgroundTint="@null"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <!-- Кнопка галереи -->
-    <Button
-        android:id="@+id/btnOpenGallery"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/gradient_button_green"
-        android:fontFamily="@font/khula_bold"
-        android:drawableStart="@android:drawable/ic_menu_gallery"
-        android:insetTop="4dp"
-        android:insetBottom="4dp"
-        android:text="Выбрать из галереи"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:backgroundTint="@null"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/navigationLayout" />
-
-    <!-- Кнопка камеры -->
-    <Button
-        android:id="@+id/btnOpenCamera"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/gradient_button_green"
-        android:fontFamily="@font/khula_bold"
-        android:drawableStart="@android:drawable/ic_menu_camera"
-        android:insetTop="4dp"
-        android:insetBottom="4dp"
-        android:text="Сфотографировать продукт"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:backgroundTint="@null"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOpenGallery" />
-
-    <!-- Поле поиска -->
-    <Button
-        android:id="@+id/btnTextSearch"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/gradient_button_green"
-        android:fontFamily="@font/khula_bold"
-        android:drawableStart="@android:drawable/ic_search_category_default"
-        android:insetTop="4dp"
-        android:insetBottom="4dp"
-        android:text="Поиск по названию"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:backgroundTint="@null"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnOpenCamera" />
-
-    <!-- Название продукта -->
-    <EditText
-        android:id="@+id/edName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:hint="Название продукта"
-        android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnTextSearch" />
-
-    <!-- Калории -->
-    <EditText
-        android:id="@+id/edKalories"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:hint="Калории (на 100г)"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edName" />
-
-    <!-- БЖУ в одной строке -->
-    <LinearLayout
-        android:id="@+id/nutritionLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="60dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edKalories">
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Белки -->
-        <EditText
-            android:id="@+id/edProteins"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:ems="5"
-            android:hint="Белки"
-            android:inputType="number" />
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="14dp"
+            android:elevation="8dp"
+            android:src="@drawable/icon2_2" />
 
-        <!-- Жиры -->
-        <EditText
-            android:id="@+id/edFats"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:ems="5"
-            android:hint="Жиры"
-            android:inputType="number" />
+            android:fontFamily="@font/khula_bold"
+            android:gravity="center"
+            android:text="Добавить продукт"
+            android:textColor="@color/c5"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-        <!-- Углеводы -->
-        <EditText
-            android:id="@+id/edCarbohydrates"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:ems="5"
-            android:hint="Углеводы"
-            android:inputType="number" />
     </LinearLayout>
 
-    <!-- Кнопка сохранения -->
+    <!-- КНОПКА "Сохранить продукт" -->
     <Button
         android:id="@+id/button2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_width="299dp"
+        android:layout_height="65dp"
+        android:layout_marginBottom="40dp"
         android:background="@drawable/gradient_button_green"
         android:fontFamily="@font/khula_bold"
         android:insetTop="4dp"
@@ -268,11 +52,417 @@
         android:text="Сохранить продукт"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="24sp"
         app:backgroundTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- ОСНОВНОЙ КОНТЕЙНЕР С КОНТЕНТОМ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/contentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/menu_background"
+        app:layout_constraintBottom_toTopOf="@+id/button2"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nutritionLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/headerContainer">
+
+        <!-- ScrollView -->
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Кнопки выбора источника изображения -->
+
+                <!-- Кнопка поиска по названию -->
+
+                <!-- Форма для ввода данных о продукте -->
+                <LinearLayout
+                    android:id="@+id/imageSourceLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <Button
+                        android:id="@+id/btnOpenGallery"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/gradient_button_green"
+                        android:fontFamily="@font/khula_bold"
+                        android:insetTop="4dp"
+                        android:insetBottom="4dp"
+                        android:text="Выбрать из галереи"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="18dp"
+                        app:strokeColor="@color/c5"
+                        app:strokeWidth="1dp" />
+
+                    <Button
+                        android:id="@+id/btnOpenCamera"
+                        android:layout_width="0dp"
+                        android:layout_height="133dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/gradient_button_green"
+                        android:fontFamily="@font/khula_bold"
+                        android:insetTop="4dp"
+                        android:insetBottom="4dp"
+                        android:text="Сделать фото"
+                        android:textAlignment="center"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="18dp"
+                        app:strokeColor="@color/c5"
+                        app:strokeWidth="1dp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnTextSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/gradient_button_green"
+                    android:fontFamily="@font/khula_bold"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
+                    android:text="Поиск по названию"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="18dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/imageSourceLayout"
+                    app:strokeColor="@color/c5"
+                    app:strokeWidth="1dp" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/productFormContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/nutrition_background"
+                    android:padding="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnTextSearch">
+
+                    <!-- Название продукта -->
+                    <EditText
+                        android:id="@+id/edName"
+                        android:layout_width="0dp"
+                        android:layout_height="58dp"
+                        android:background="@drawable/button_menu_background"
+                        android:fontFamily="@font/khula_light"
+                        android:gravity="center"
+                        android:hint="Название продукта"
+                        android:inputType="text"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@color/c5"
+                        android:textColorHint="@color/c5"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <!-- Калории -->
+                    <EditText
+                        android:id="@+id/edKalories"
+                        android:layout_width="0dp"
+                        android:layout_height="58dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/edittext_background"
+                        android:fontFamily="@font/khula_light"
+                        android:gravity="center"
+                        android:hint="Калории (на 100г)"
+                        android:inputType="number"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="@color/c5"
+                        android:textColorHint="@color/c5"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/edName" />
+
+                    <!-- БЖУ в одной строке -->
+                    <LinearLayout
+                        android:id="@+id/nutritionLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="58dp"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/edKalories">
+
+                        <!-- Белки -->
+                        <EditText
+                            android:id="@+id/edProteins"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/edittext_background"
+                            android:fontFamily="@font/khula_light"
+                            android:gravity="center"
+                            android:hint="Белки"
+                            android:inputType="number"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:textColor="@color/c5"
+                            android:textColorHint="@color/c5"
+                            android:textSize="16sp" />
+
+                        <!-- Жиры -->
+                        <EditText
+                            android:id="@+id/edFats"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/edittext_background"
+                            android:fontFamily="@font/khula_light"
+                            android:gravity="center"
+                            android:hint="Жиры"
+                            android:inputType="number"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:textColor="@color/c5"
+                            android:textColorHint="@color/c5"
+                            android:textSize="16sp" />
+
+                        <!-- Углеводы -->
+                        <EditText
+                            android:id="@+id/edCarbohydrates"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/edittext_background"
+                            android:fontFamily="@font/khula_light"
+                            android:gravity="center"
+                            android:hint="Углеводы"
+                            android:inputType="number"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:textColor="@color/c5"
+                            android:textColorHint="@color/c5"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- ОВЕРЛЕЙ ДЛЯ ИЗОБРАЖЕНИЯ И НЕЙРОСЕТИ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/imageOverlayContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Основной контейнер оверлея -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/overlayContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/menu_background"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.3">
+
+            <!-- Кнопка закрытия оверлея -->
+            <ImageView
+                android:id="@+id/btnCloseOverlay"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/icon2_2"
+                android:contentDescription="Закрыть"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Квадратное изображение -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/imageSquareContainer"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/c1"
+                android:padding="4dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnCloseOverlay">
+
+                <!-- TextView для отображения изображения -->
+                <TextView
+                    android:id="@+id/tvList"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:gravity="center"
+                    android:text="Загрузка..."
+                    android:textColor="@color/c5"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/khula_regular"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Информация о текущем продукте (ПОД изображением) -->
+            <TextView
+                android:id="@+id/tvProductInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="Продукт 1 из 1 - Название продукта"
+                android:textColor="@color/c5"
+                android:textSize="20sp"
+                android:fontFamily="@font/khula_bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageSquareContainer" />
+
+            <!-- Панель навигации с стрелками и кнопкой выбора -->
+            <LinearLayout
+                android:id="@+id/navigationPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvProductInfo">
+
+                <!-- Стрелка влево -->
+                <Button
+                    android:id="@+id/btnPrevProduct"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/gradient_button_green"
+                    android:fontFamily="@font/khula_bold"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
+                    android:text="←"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    app:backgroundTint="@null"
+                    android:visibility="gone" />
+
+                <!-- Кнопка "Выбрать продукт" (ШИРЕ) -->
+                <Button
+                    android:id="@+id/btnSelectProduct"
+                    android:layout_width="0dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:minWidth="180dp"
+                    android:background="@drawable/gradient_button_green"
+                    android:fontFamily="@font/khula_bold"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
+                    android:text="Выбрать продукт"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    app:backgroundTint="@null" />
+
+                <!-- Стрелка вправо -->
+                <Button
+                    android:id="@+id/btnNextProduct"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/gradient_button_green"
+                    android:fontFamily="@font/khula_bold"
+                    android:insetTop="4dp"
+                    android:insetBottom="4dp"
+                    android:text="→"
+                    android:textAlignment="center"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    app:backgroundTint="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- Кнопка для ручного ввода -->
+            <Button
+                android:id="@+id/btnManualInput"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/gradient_button_green"
+                android:fontFamily="@font/khula_bold"
+                android:insetTop="4dp"
+                android:insetBottom="4dp"
+                android:text="Ввести вручную"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:backgroundTint="@null"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/navigationPanel" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
